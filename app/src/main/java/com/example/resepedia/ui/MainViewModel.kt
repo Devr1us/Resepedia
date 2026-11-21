@@ -31,7 +31,7 @@ class MainViewModel(
 
     // State Kategori
     private val _categoriesState = MutableStateFlow<UiState<List<CategoryItem>>>(UiState.Loading)
-    val categoriesState: StateFlow<UiState<List<CategoryItem>>>(get() = _categoriesState.asStateFlow())
+    val categoriesState: StateFlow<UiState<List<CategoryItem>>> = _categoriesState.asStateFlow()
 
     // Kategori Terpilih (Default: Chicken)
     private val _selectedCategory = MutableStateFlow("Chicken")
