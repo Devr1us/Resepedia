@@ -3,13 +3,13 @@ package com.example.resepedia
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.ViewModelProvider
 import com.example.resepedia.data.AppThemeMode
 import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.navigation.AppNavigation
@@ -17,7 +17,9 @@ import com.example.resepedia.ui.theme.ResepediaTheme
 
 class MainActivity : AppCompatActivity() {
 
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by lazy {
+        ViewModelProvider(this)[MainViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
