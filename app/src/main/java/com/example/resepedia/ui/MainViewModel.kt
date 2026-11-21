@@ -17,9 +17,15 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(
     application: Application,
-    private val repository: RecipeRepository = RecipeRepository(),
-    private val preferencesManager: PreferencesManager = PreferencesManager(application)
+    private val repository: RecipeRepository,
+    private val preferencesManager: PreferencesManager
 ) : AndroidViewModel(application) {
+
+    constructor(application: Application) : this(
+        application = application,
+        repository = RecipeRepository(),
+        preferencesManager = PreferencesManager(application)
+    )
 
     // Status Tema & Favorit ID dari Preferences
     val themeMode: StateFlow<AppThemeMode> = preferencesManager.themeMode
