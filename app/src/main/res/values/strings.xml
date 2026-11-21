@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Identitas Aplikasi -->
+    <string name="app_name">Resepedia</string>
+    <string name="tagline">Recipe Encyclopedia</string>
+
+    <!-- Header & Dashboard -->
+    <string name="greeting_title">What would you like to cook today?</string>
+    <string name="search_placeholder">Search recipes, ingredients...</string>
+    <string name="search_clear_desc">Clear search query</string>
+    <string name="search_results_title">Search Results for \"%1$s\"</string>
+    <string name="hero_badge">Recipe of the Day</string>
+    <string name="hero_view_recipe">View Recipe</string>
+    <string name="hero_refresh_desc">Get another random recipe</string>
+    <string name="categories_title">Categories</string>
+    <string name="recipes_by_category">Recipes in %1$s</string>
+    <string name="all_categories">All Categories</string>
+
+    <!-- Navigasi Bawah -->
+    <string name="nav_home">Home</string>
+    <string name="nav_favorite">Favorites</string>
+    <string name="nav_home_desc">Navigate to Home</string>
+    <string name="nav_favorite_desc">Navigate to Favorites</string>
+
+    <!-- Pengaturan Tema & Bahasa -->
+    <string name="btn_change_language">Change Language</string>
+    <string name="btn_change_theme">Change Theme</string>
+    <string name="theme_dialog_title">Choose Theme</string>
+    <string name="theme_system">Follow System</string>
+    <string name="theme_light">Light Mode</string>
+    <string name="theme_dark">Dark Mode</string>
+    <string name="lang_dialog_title">Choose Language</string>
+    <string name="lang_english">English</string>
+    <string name="lang_indonesian">Bahasa Indonesia</string>
+
+    <!-- Tombol & Aksi -->
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_retry">Try Again</string>
+    <string name="btn_back">Back</string>
+    <string name="btn_favorite_add">Add to Favorites</string>
+    <string name="btn_favorite_remove">Remove from Favorites</string>
+
+    <!-- Detail Resep -->
+    <string name="detail_category">Category: %1$s</string>
+    <string name="detail_area">Origin: %1$s</string>
+    <string name="detail_watch_youtube">Watch on YouTube</string>
+    <string name="detail_ingredients_title">Ingredients</string>
+    <string name="detail_instructions_title">Cooking Instructions</string>
+    <string name="detail_step_number">Step %1$d</string>
+    <string name="total_ingredients">%1$d ingredients</string>
+
+    <!-- Status & Error -->
+    <string name="favorites_empty_title">No Favorite Recipes Yet</string>
+    <string name="favorites_empty_desc">Tap the heart icon on any recipe to save it to your favorites.</string>
+    <string name="search_empty_title">No Recipes Found</string>
+    <string name="search_empty_desc">Try searching with a different keyword.</string>
+    <string name="error_connection_title">Connection Issue</string>
+    <string name="error_connection_desc">Unable to connect to the server. Please check your internet connection.</string>
+    <string name="loading_desc">Loading data...</string>
+
+    <!-- Accessibility / Content Description -->
+    <string name="recipe_image_desc">Photo of %1$s</string>
+    <string name="category_image_desc">Category %1$s</string>
+    <string name="recipe_card_desc">Recipe card for %1$s</string>
+    <string name="favorite_badge">Saved</string>
+</resources>

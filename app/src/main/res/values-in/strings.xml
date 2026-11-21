@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Identitas Aplikasi -->
+    <string name="app_name">Resepedia</string>
+    <string name="tagline">Ensiklopedia Resep</string>
+
+    <!-- Header & Dashboard -->
+    <string name="greeting_title">Halo, mau masak apa hari ini?</string>
+    <string name="search_placeholder">Cari resep, bahan makanan...</string>
+    <string name="search_clear_desc">Hapus pencarian</string>
+    <string name="search_results_title">Hasil Pencarian untuk \"%1$s\"</string>
+    <string name="hero_badge">Resep Hari Ini</string>
+    <string name="hero_view_recipe">Lihat Resep</string>
+    <string name="hero_refresh_desc">Muat resep acak lainnya</string>
+    <string name="categories_title">Kategori</string>
+    <string name="recipes_by_category">Resep Kategori %1$s</string>
+    <string name="all_categories">Semua Kategori</string>
+
+    <!-- Navigasi Bawah -->
+    <string name="nav_home">Beranda</string>
+    <string name="nav_favorite">Favorit</string>
+    <string name="nav_home_desc">Navigasi ke Beranda</string>
+    <string name="nav_favorite_desc">Navigasi ke Favorit</string>
+
+    <!-- Pengaturan Tema & Bahasa -->
+    <string name="btn_change_language">Ganti Bahasa</string>
+    <string name="btn_change_theme">Ganti Tema</string>
+    <string name="theme_dialog_title">Pilih Tema</string>
+    <string name="theme_system">Ikuti Sistem</string>
+    <string name="theme_light">Mode Terang</string>
+    <string name="theme_dark">Mode Gelap</string>
+    <string name="lang_dialog_title">Pilih Bahasa</string>
+    <string name="lang_english">English</string>
+    <string name="lang_indonesian">Bahasa Indonesia</string>
+
+    <!-- Tombol & Aksi -->
+    <string name="btn_cancel">Batal</string>
+    <string name="btn_retry">Coba Lagi</string>
+    <string name="btn_back">Kembali</string>
+    <string name="btn_favorite_add">Tambah ke Favorit</string>
+    <string name="btn_favorite_remove">Hapus dari Favorit</string>
+
+    <!-- Detail Resep -->
+    <string name="detail_category">Kategori: %1$s</string>
+    <string name="detail_area">Asal: %1$s</string>
+    <string name="detail_watch_youtube">Tonton di YouTube</string>
+    <string name="detail_ingredients_title">Bahan-Bahan</string>
+    <string name="detail_instructions_title">Langkah Memasak</string>
+    <string name="detail_step_number">Langkah %1$d</string>
+    <string name="total_ingredients">%1$d bahan</string>
+
+    <!-- Status & Error -->
+    <string name="favorites_empty_title">Belum Ada Resep Favorit</string>
+    <string name="favorites_empty_desc">Ketuk ikon hati pada resep apa saja untuk menyimpannya di daftar favorit Anda.</string>
+    <string name="search_empty_title">Resep Tidak Ditemukan</string>
+    <string name="search_empty_desc">Coba cari dengan kata kunci lain.</string>
+    <string name="error_connection_title">Gagal Memuat Data</string>
+    <string name="error_connection_desc">Tidak dapat terhubung ke server. Periksa koneksi internet Anda.</string>
+    <string name="loading_desc">Memuat data...</string>
+
+    <!-- Accessibility / Content Description -->
+    <string name="recipe_image_desc">Foto resep %1$s</string>
+    <string name="category_image_desc">Kategori %1$s</string>
+    <string name="recipe_card_desc">Kartu resep %1$s</string>
+    <string name="favorite_badge">Tersimpan</string>
+</resources>

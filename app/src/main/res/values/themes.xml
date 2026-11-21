@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Parent menggunakan Theme.Material3.DayNight.NoActionBar agar AppCompatActivity tidak crash -->
+    <style name="Theme.Resepedia" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Pewarnaan status bar & navigation bar dikelola oleh enableEdgeToEdge() di Jetpack Compose -->
+    </style>
+</resources>
