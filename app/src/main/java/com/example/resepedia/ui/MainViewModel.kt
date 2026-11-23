@@ -13,11 +13,19 @@ import com.example.resepedia.model.MealDetail
 import com.example.resepedia.model.MealSummary
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+/**
+ * Mode tab untuk Layar Pencarian Khusus
+ */
+enum class SearchTabMode {
+    NAME, INGREDIENTS
+}
 
 class MainViewModel(
     application: Application,
@@ -37,6 +45,58 @@ class MainViewModel(
     // Status Tema & Favorit ID dari Preferences
     val themeMode: StateFlow<AppThemeMode> = preferencesManager.themeMode
     val favoriteIds: StateFlow<Set<String>> = preferencesManager.favoriteIds
+
+    // Status Shake & Riwayat Pencarian dari Preferences
+    val isShakeEnabled: StateFlow<Boolean> = preferencesManager.isShakeEnabled
+    val searchHistory: StateFlow<List<String>> = preferencesManager.searchHistory
+
+    fun setShakeEnabled(enabled: Boolean) {
+        preferencesManager.setShakeEnabled(enabled)
+    }
+
+    fun addSearchHistory(query: String) {
+        preferencesManager.addSearchHistory(query)
+    }
+
+    fun removeSearchHistory(query: String) {
+        preferencesManager.removeSearchHistory(query)
+    }
+
+    fun clearSearchHistory() {
+        preferencesManager.clearSearchHistory()
+    }
+
+    // Status loading tombol Surprise Me (Resep Acak)
+    private val _isSurpriseLoading = MutableStateFlow(false)
+    val isSurpriseLoading: StateFlow<Boolean> = _isSurpriseLoading.asStateFlow()
+
+    /**
+     * Memanggil API random.php untuk fitur Surprise Me / Shake.
+     * Dilengkapi guard untuk mencegah double-trigger / navigasi ganda saat request berjalan.
+     */
+    fun fetchRandomMeal(
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        if (_isSurpriseLoading.value) return
+        _isSurpriseLoading.value = true
+
+        viewModelScope.launch {
+            try {
+                val meal = repository.getRandomMeal()
+                _isSurpriseLoading.value = false
+                val mealId = meal?.idMeal
+                if (!mealId.isNullOrBlank()) {
+                    onSuccess(mealId)
+                } else {
+                    onError("Resep acak tidak ditemukan")
+                }
+            } catch (e: Exception) {
+                _isSurpriseLoading.value = false
+                onError(e.localizedMessage ?: "Gagal memuat resep acak")
+            }
+        }
+    }
 
     // Flag untuk memastikan Splash Screen hanya tampil satu kali per proses aplikasi
     var splashShown: Boolean = false
@@ -68,6 +128,52 @@ class MainViewModel(
 
     private val _searchResultsState = MutableStateFlow<UiState<List<MealSummary>>?>(null)
     val searchResultsState: StateFlow<UiState<List<MealSummary>>?> = _searchResultsState.asStateFlow()
+
+    // ==========================================
+    // STATE SEARCH SCREEN (TAB, NAMA, & BAHAN)
+    // ==========================================
+    private val _searchTabMode = MutableStateFlow(SearchTabMode.NAME)
+    val searchTabMode: StateFlow<SearchTabMode> = _searchTabMode.asStateFlow()
+
+    fun setSearchTabMode(mode: SearchTabMode) {
+        _searchTabMode.value = mode
+    }
+
+    // --- Mode Nama ---
+    private val _nameSearchQuery = MutableStateFlow("")
+    val nameSearchQuery: StateFlow<String> = _nameSearchQuery.asStateFlow()
+
+    private val _selectedLetter = MutableStateFlow<Char?>(null)
+    val selectedLetter: StateFlow<Char?> = _selectedLetter.asStateFlow()
+
+    private val _nameSearchResults = MutableStateFlow<UiState<List<MealSummary>>?>(null)
+    val nameSearchResults: StateFlow<UiState<List<MealSummary>>?> = _nameSearchResults.asStateFlow()
+
+    private var nameSearchJob: Job? = null
+
+    // --- Mode Bahan ---
+    private val _ingredientQuery = MutableStateFlow("")
+    val ingredientQuery: StateFlow<String> = _ingredientQuery.asStateFlow()
+
+    private val _allIngredients = MutableStateFlow<List<String>>(emptyList())
+    val allIngredients: StateFlow<List<String>> = _allIngredients.asStateFlow()
+
+    private val _autocompleteSuggestions = MutableStateFlow<List<String>>(emptyList())
+    val autocompleteSuggestions: StateFlow<List<String>> = _autocompleteSuggestions.asStateFlow()
+
+    private val _selectedIngredients = MutableStateFlow<List<String>>(emptyList())
+    val selectedIngredients: StateFlow<List<String>> = _selectedIngredients.asStateFlow()
+
+    private val _isAllIngredientsMode = MutableStateFlow(true) // default: semua bahan (AND)
+    val isAllIngredientsMode: StateFlow<Boolean> = _isAllIngredientsMode.asStateFlow()
+
+    private val _ingredientSearchResults = MutableStateFlow<UiState<List<MealSummary>>?>(null)
+    val ingredientSearchResults: StateFlow<UiState<List<MealSummary>>?> = _ingredientSearchResults.asStateFlow()
+
+    private val _ingredientLimitMessage = MutableStateFlow(false)
+    val ingredientLimitMessage: StateFlow<Boolean> = _ingredientLimitMessage.asStateFlow()
+
+    private var ingredientSearchJob: Job? = null
 
     // State Resep Favorit
     private val _favoritesState = MutableStateFlow<UiState<List<MealSummary>>>(UiState.Success(emptyList()))
@@ -189,6 +295,180 @@ class MainViewModel(
     fun clearSearch() {
         _searchQuery.value = ""
         _searchResultsState.value = null
+    }
+
+    // ==========================================
+    // LOGIKA PENCARIAN MODE NAMA
+    // ==========================================
+    fun onNameQueryChange(query: String) {
+        _nameSearchQuery.value = query
+        _selectedLetter.value = null
+        nameSearchJob?.cancel()
+
+        if (query.isBlank()) {
+            _nameSearchResults.value = null
+            return
+        }
+
+        nameSearchJob = viewModelScope.launch {
+            delay(400) // Debounce 400ms
+            performNameSearch(query.trim())
+        }
+    }
+
+    fun submitNameSearch(query: String) {
+        val trimmed = query.trim()
+        if (trimmed.isBlank()) return
+        _nameSearchQuery.value = trimmed
+        _selectedLetter.value = null
+        addSearchHistory(trimmed)
+        nameSearchJob?.cancel()
+        nameSearchJob = viewModelScope.launch {
+            performNameSearch(trimmed)
+        }
+    }
+
+    private suspend fun performNameSearch(query: String) {
+        _nameSearchResults.value = UiState.Loading
+        try {
+            val results = repository.searchMeals(query)
+            _nameSearchResults.value = UiState.Success(results)
+            translateTexts(results.map { it.strMeal })
+        } catch (e: Exception) {
+            if (e !is CancellationException) {
+                _nameSearchResults.value = UiState.Error(e.localizedMessage)
+            }
+        }
+    }
+
+    fun selectLetter(letter: Char) {
+        if (_selectedLetter.value == letter) {
+            _selectedLetter.value = null
+            _nameSearchResults.value = null
+            return
+        }
+        _selectedLetter.value = letter
+        _nameSearchQuery.value = ""
+        nameSearchJob?.cancel()
+        nameSearchJob = viewModelScope.launch {
+            _nameSearchResults.value = UiState.Loading
+            try {
+                val results = repository.searchMealsByFirstLetter(letter.toString())
+                _nameSearchResults.value = UiState.Success(results)
+                translateTexts(results.map { it.strMeal })
+            } catch (e: Exception) {
+                if (e !is CancellationException) {
+                    _nameSearchResults.value = UiState.Error(e.localizedMessage)
+                }
+            }
+        }
+    }
+
+    fun clearNameSearch() {
+        _nameSearchQuery.value = ""
+        _selectedLetter.value = null
+        nameSearchJob?.cancel()
+        _nameSearchResults.value = null
+    }
+
+    // ==========================================
+    // LOGIKA PENCARIAN MODE BAHAN
+    // ==========================================
+    fun loadAllIngredients() {
+        if (_allIngredients.value.isNotEmpty()) return
+        viewModelScope.launch {
+            try {
+                val list = repository.getIngredientList()
+                _allIngredients.value = list
+            } catch (e: Exception) {
+                // Abaikan bila offline / gagal
+            }
+        }
+    }
+
+    fun onIngredientQueryChange(query: String) {
+        _ingredientQuery.value = query
+        val trimmed = query.trim()
+        if (trimmed.isBlank()) {
+            _autocompleteSuggestions.value = emptyList()
+        } else {
+            val filtered = _allIngredients.value
+                .filter { it.contains(trimmed, ignoreCase = true) }
+                .take(8)
+            _autocompleteSuggestions.value = filtered
+        }
+    }
+
+    fun addSelectedIngredient(ingredient: String) {
+        val trimmed = ingredient.trim()
+        if (trimmed.isBlank()) return
+
+        val current = _selectedIngredients.value.toMutableList()
+        if (current.any { it.equals(trimmed, ignoreCase = true) }) {
+            _ingredientQuery.value = ""
+            _autocompleteSuggestions.value = emptyList()
+            return
+        }
+
+        if (current.size >= 5) {
+            _ingredientLimitMessage.value = true
+            return
+        }
+
+        current.add(trimmed)
+        _selectedIngredients.value = current
+        _ingredientQuery.value = ""
+        _autocompleteSuggestions.value = emptyList()
+        _ingredientLimitMessage.value = false
+        executeIngredientSearch()
+    }
+
+    fun removeSelectedIngredient(ingredient: String) {
+        val current = _selectedIngredients.value.toMutableList()
+        current.removeAll { it.equals(ingredient, ignoreCase = true) }
+        _selectedIngredients.value = current
+        _ingredientLimitMessage.value = false
+        executeIngredientSearch()
+    }
+
+    fun setIsAllIngredientsMode(isAll: Boolean) {
+        if (_isAllIngredientsMode.value == isAll) return
+        _isAllIngredientsMode.value = isAll
+        executeIngredientSearch()
+    }
+
+    fun resetIngredientLimitMessage() {
+        _ingredientLimitMessage.value = false
+    }
+
+    fun clearIngredientSearch() {
+        _ingredientQuery.value = ""
+        _autocompleteSuggestions.value = emptyList()
+    }
+
+    fun executeIngredientSearch() {
+        val selected = _selectedIngredients.value
+        if (selected.isEmpty()) {
+            _ingredientSearchResults.value = null
+            return
+        }
+
+        ingredientSearchJob?.cancel()
+        ingredientSearchJob = viewModelScope.launch {
+            _ingredientSearchResults.value = UiState.Loading
+            try {
+                val results = repository.searchMealsByIngredients(
+                    ingredients = selected,
+                    isAllIngredients = _isAllIngredientsMode.value
+                )
+                _ingredientSearchResults.value = UiState.Success(results)
+                translateTexts(results.map { it.strMeal })
+            } catch (e: Exception) {
+                if (e !is CancellationException) {
+                    _ingredientSearchResults.value = UiState.Error(e.localizedMessage)
+                }
+            }
+        }
     }
 
     fun loadMealDetail(mealId: String) {
@@ -371,6 +651,18 @@ class MainViewModel(
         val searchResults = _searchResultsState.value
         if (searchResults is UiState.Success) {
             textsToTranslate.addAll(searchResults.data.map { it.strMeal })
+        }
+
+        // 4b. Hasil Pencarian Mode Nama
+        val nameResults = _nameSearchResults.value
+        if (nameResults is UiState.Success) {
+            textsToTranslate.addAll(nameResults.data.map { it.strMeal })
+        }
+
+        // 4c. Hasil Pencarian Mode Bahan
+        val ingResults = _ingredientSearchResults.value
+        if (ingResults is UiState.Success) {
+            textsToTranslate.addAll(ingResults.data.map { it.strMeal })
         }
 
         // 5. Favorit

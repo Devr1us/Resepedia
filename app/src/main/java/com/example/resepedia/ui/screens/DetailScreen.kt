@@ -4,8 +4,11 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +28,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.CheckCircle
@@ -45,10 +50,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -72,10 +79,23 @@ fun DetailScreen(
     mealId: String,
     viewModel: MainViewModel,
     onNavigateBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    ingredientsParam: String? = null
 ) {
     LaunchedEffect(mealId) {
         viewModel.loadMealDetail(mealId)
+    }
+
+    val matchedKeywords = remember(ingredientsParam) {
+        if (ingredientsParam.isNullOrBlank()) emptyList()
+        else {
+            try {
+                val decoded = java.net.URLDecoder.decode(ingredientsParam, "UTF-8")
+                decoded.split(",").map { it.trim() }.filter { it.isNotBlank() }
+            } catch (e: Exception) {
+                ingredientsParam.split(",").map { it.trim() }.filter { it.isNotBlank() }
+            }
+        }
     }
 
     val detailState by viewModel.detailMealState.collectAsState()
@@ -326,12 +346,65 @@ fun DetailScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    // Banner Kecocokan Bahan dari Hasil Pencarian
+                    AnimatedVisibility(
+                        visible = matchedKeywords.isNotEmpty(),
+                        enter = fadeIn(Motion.mediumTween()) + expandVertically(Motion.mediumTween()),
+                        exit = fadeOut(Motion.shortTween()) + shrinkVertically(Motion.shortTween())
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 12.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = stringResource(
+                                        R.string.detail_match_banner,
+                                        matchedKeywords.joinToString(", ")
+                                    ),
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                    }
+
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         ingredients.forEachIndexed { index, item ->
+                            val isMatched = matchedKeywords.any { keyword ->
+                                item.name.contains(keyword, ignoreCase = true) ||
+                                        keyword.contains(item.name, ignoreCase = true)
+                            }
+
+                            val cardContainerColor = if (isMatched) {
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            }
+
+                            val checkmarkScale by animateFloatAsState(
+                                targetValue = if (isMatched) 1.15f else 1f,
+                                animationSpec = Motion.mediumTween(),
+                                label = "checkmarkScale"
+                            )
+
                             Card(
                                 shape = RoundedCornerShape(12.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surface
+                                    containerColor = cardContainerColor
                                 ),
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -350,16 +423,21 @@ fun DetailScreen(
                                         modifier = Modifier.weight(1f)
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Outlined.CheckCircle,
+                                            imageVector = if (isMatched) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
                                             contentDescription = null,
-                                            tint = AccentGreen,
-                                            modifier = Modifier.size(16.dp)
+                                            tint = if (isMatched) MaterialTheme.colorScheme.primary else AccentGreen,
+                                            modifier = Modifier
+                                                .size(16.dp)
+                                                .graphicsLayer {
+                                                    scaleX = checkmarkScale
+                                                    scaleY = checkmarkScale
+                                                }
                                         )
                                         Spacer(modifier = Modifier.width(10.dp))
                                         Text(
                                             text = item.name,
                                             style = MaterialTheme.typography.bodyMedium.copy(
-                                                fontWeight = FontWeight.Medium
+                                                fontWeight = if (isMatched) FontWeight.Bold else FontWeight.Medium
                                             ),
                                             color = MaterialTheme.colorScheme.onSurface
                                         )

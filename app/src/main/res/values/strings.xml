@@ -134,4 +134,35 @@
     <string name="category_image_desc">Category %1$s</string>
     <string name="recipe_card_desc">Recipe card for %1$s</string>
     <string name="favorite_badge">Saved</string>
+
+    <!-- Surprise Me & Shake -->
+    <string name="btn_surprise_me">Surprise Me!</string>
+    <string name="surprise_me_desc">Don\'t know what to cook? Tap or shake for a random recipe!</string>
+    <string name="surprise_me_loading">Discovering a delicious recipe...</string>
+    <string name="surprise_me_error">Failed to fetch a random recipe. Tap to retry.</string>
+    <string name="settings_section_interaction">Interaction</string>
+    <string name="settings_shake_title">Shake to Discover</string>
+    <string name="settings_shake_desc">Shake your device to instantly discover a random recipe</string>
+
+    <!-- Search Screen -->
+    <string name="search_tab_name">Recipe Name</string>
+    <string name="search_tab_ingredient">Ingredients</string>
+    <string name="search_placeholder_name">Search recipe name, e.g. Pasta, Curry...</string>
+    <string name="search_placeholder_ingredient">Search ingredients, e.g. chicken, garlic...</string>
+    <string name="search_history_title">Recent Searches</string>
+    <string name="search_history_clear_all">Clear All</string>
+    <string name="search_popular_title">Popular Searches</string>
+    <string name="search_browse_letter_title">Browse by Letter (A-Z)</string>
+    <string name="search_popular_ingredients_title">Popular Ingredients</string>
+    <string name="search_selected_ingredients_title">Selected Ingredients (%1$d/5)</string>
+    <string name="search_ingredient_limit_reached">Maximum 5 ingredients selected</string>
+    <string name="search_ingredient_filter_all">All ingredients (AND)</string>
+    <string name="search_ingredient_filter_any">Any ingredient (OR)</string>
+    <string name="search_results_count">%1$d recipes found</string>
+    <string name="search_empty_ingredient_title">No Recipes Found</string>
+    <string name="search_empty_ingredient_desc">No recipes use all selected ingredients. Try selecting \"Any ingredient\" mode.</string>
+    <string name="search_autocomplete_header">Ingredient suggestions</string>
+
+    <!-- Detail Recipe Ingredient Matching -->
+    <string name="detail_match_banner">Matches your search: %1$s</string>
 </resources>

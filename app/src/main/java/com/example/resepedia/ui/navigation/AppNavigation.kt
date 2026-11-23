@@ -41,6 +41,7 @@ import com.example.resepedia.ui.screens.DashboardScreen
 import com.example.resepedia.ui.screens.DetailScreen
 import com.example.resepedia.ui.screens.FavoritesScreen
 import com.example.resepedia.ui.screens.OnboardingScreen
+import com.example.resepedia.ui.screens.SearchScreen
 import com.example.resepedia.ui.screens.SettingsScreen
 import com.example.resepedia.ui.screens.SplashScreen
 import com.example.resepedia.ui.theme.Motion
@@ -276,6 +277,9 @@ fun AppNavigation(
                     },
                     onNavigateToSettings = {
                         navController.navigate(Screen.Settings.route)
+                    },
+                    onNavigateToSearch = {
+                        navController.navigate(Screen.Search.route)
                     }
                 )
             }
@@ -336,11 +340,50 @@ fun AppNavigation(
                 )
             }
 
+            // Layar Pencarian Khusus: Masuk dengan slide dari atas + fade
+            composable(
+                route = Screen.Search.route,
+                enterTransition = {
+                    slideInVertically(
+                        initialOffsetY = { -it / 4 },
+                        animationSpec = Motion.mediumTween()
+                    ) + fadeIn(animationSpec = Motion.mediumTween())
+                },
+                exitTransition = {
+                    slideOutVertically(
+                        targetOffsetY = { -it / 4 },
+                        animationSpec = Motion.shortTween()
+                    ) + fadeOut(animationSpec = Motion.shortTween())
+                },
+                popEnterTransition = {
+                    fadeIn(animationSpec = Motion.mediumTween())
+                },
+                popExitTransition = {
+                    slideOutVertically(
+                        targetOffsetY = { -it / 4 },
+                        animationSpec = Motion.shortTween()
+                    ) + fadeOut(animationSpec = Motion.shortTween())
+                }
+            ) {
+                SearchScreen(
+                    viewModel = viewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDetail = { mealId, ingredientsParam ->
+                        navController.navigate(Screen.Detail.createRoute(mealId, ingredientsParam))
+                    }
+                )
+            }
+
             // Layar Detail: Masuk dengan slide dari kanan + fade, keluar sebaliknya
             composable(
                 route = Screen.Detail.route,
                 arguments = listOf(
-                    navArgument("mealId") { type = NavType.StringType }
+                    navArgument("mealId") { type = NavType.StringType },
+                    navArgument("ingredients") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
                 ),
                 enterTransition = {
                     slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }, animationSpec = Motion.mediumTween()) +
@@ -359,9 +402,11 @@ fun AppNavigation(
                 }
             ) { backStackEntry ->
                 val mealId = backStackEntry.arguments?.getString("mealId").orEmpty()
+                val ingredients = backStackEntry.arguments?.getString("ingredients")
                 DetailScreen(
                     mealId = mealId,
                     viewModel = viewModel,
+                    ingredientsParam = ingredients,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

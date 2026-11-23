@@ -43,6 +43,25 @@ data class AreaItem(
 )
 
 /**
+ * Respons API untuk daftar seluruh bahan makanan (list.php?i=list)
+ */
+data class IngredientListResponse(
+    @SerializedName("meals")
+    val meals: List<IngredientItem>?
+)
+
+data class IngredientItem(
+    @SerializedName("idIngredient")
+    val idIngredient: String?,
+    @SerializedName("strIngredient")
+    val strIngredient: String?,
+    @SerializedName("strDescription")
+    val strDescription: String?,
+    @SerializedName("strType")
+    val strType: String?
+)
+
+/**
  * Respons API untuk daftar resep per kategori (filter.php) dan pencarian (search.php)
  */
 data class MealListResponse(

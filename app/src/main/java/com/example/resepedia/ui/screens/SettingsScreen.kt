@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -43,6 +44,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -64,6 +66,7 @@ import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.components.AppLogo
 import com.example.resepedia.ui.components.SettingsInfoRow
 import com.example.resepedia.ui.components.SettingsSectionCard
+import com.example.resepedia.ui.util.ShakeDetector
 
 /**
  * Layar Pengaturan (Settings):
@@ -243,6 +246,28 @@ fun SettingsScreen(
                         }
                     }
                 )
+            }
+
+            // ==========================================
+            // KELOMPOK INTERAKSI (INTERACTION) - JIKA ADA AKSELEROMETER
+            // ==========================================
+            val hasAccelerometer = remember { ShakeDetector.hasAccelerometer(context) }
+            val isShakeEnabled by viewModel.isShakeEnabled.collectAsState()
+
+            if (hasAccelerometer) {
+                SettingsSectionCard(title = stringResource(R.string.settings_section_interaction)) {
+                    SettingsInfoRow(
+                        icon = Icons.Outlined.Vibration,
+                        title = stringResource(R.string.settings_shake_title),
+                        subtitle = stringResource(R.string.settings_shake_desc),
+                        trailingContent = {
+                            Switch(
+                                checked = isShakeEnabled,
+                                onCheckedChange = { viewModel.setShakeEnabled(it) }
+                            )
+                        }
+                    )
+                }
             }
 
             // ==========================================

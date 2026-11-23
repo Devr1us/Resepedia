@@ -134,4 +134,35 @@
     <string name="category_image_desc">Kategori %1$s</string>
     <string name="recipe_card_desc">Kartu resep %1$s</string>
     <string name="favorite_badge">Tersimpan</string>
+
+    <!-- Surprise Me & Shake -->
+    <string name="btn_surprise_me">Resep Acak!</string>
+    <string name="surprise_me_desc">Bingung mau masak apa? Ketuk atau goyang HP untuk resep acak!</string>
+    <string name="surprise_me_loading">Mencari resep lezat...</string>
+    <string name="surprise_me_error">Gagal memuat resep acak. Ketuk untuk coba lagi.</string>
+    <string name="settings_section_interaction">Interaksi</string>
+    <string name="settings_shake_title">Acak dengan Goyangan (Shake)</string>
+    <string name="settings_shake_desc">Goyangkan perangkat untuk membuka resep acak secara instan</string>
+
+    <!-- Search Screen -->
+    <string name="search_tab_name">Nama</string>
+    <string name="search_tab_ingredient">Bahan</string>
+    <string name="search_placeholder_name">Cari nama resep, mis. Pasta, Curry...</string>
+    <string name="search_placeholder_ingredient">Cari bahan, mis. chicken, garlic...</string>
+    <string name="search_history_title">Riwayat Pencarian</string>
+    <string name="search_history_clear_all">Hapus Semua</string>
+    <string name="search_popular_title">Pencarian Populer</string>
+    <string name="search_browse_letter_title">Jelajah Huruf (A-Z)</string>
+    <string name="search_popular_ingredients_title">Bahan Populer</string>
+    <string name="search_selected_ingredients_title">Bahan Terpilih (%1$d/5)</string>
+    <string name="search_ingredient_limit_reached">Maksimal 5 bahan terpilih</string>
+    <string name="search_ingredient_filter_all">Semua bahan</string>
+    <string name="search_ingredient_filter_any">Salah satu bahan</string>
+    <string name="search_results_count">%1$d resep cocok</string>
+    <string name="search_empty_ingredient_title">Resep Tidak Ditemukan</string>
+    <string name="search_empty_ingredient_desc">Tidak ada resep yang memakai semua bahan ini. Coba mode \"Salah satu bahan\".</string>
+    <string name="search_autocomplete_header">Saran bahan</string>
+
+    <!-- Detail Recipe Ingredient Matching -->
+    <string name="detail_match_banner">Cocok dengan pencarian: %1$s</string>
 </resources>

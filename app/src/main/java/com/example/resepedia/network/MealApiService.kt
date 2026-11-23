@@ -2,6 +2,7 @@ package com.example.resepedia.network
 
 import com.example.resepedia.model.AreaResponse
 import com.example.resepedia.model.CategoryResponse
+import com.example.resepedia.model.IngredientListResponse
 import com.example.resepedia.model.MealDetailResponse
 import com.example.resepedia.model.MealListResponse
 import retrofit2.http.GET
@@ -29,4 +30,13 @@ interface MealApiService {
 
     @GET("filter.php")
     suspend fun getMealsByArea(@Query("a") area: String): MealListResponse
+
+    @GET("search.php")
+    suspend fun searchMealsByFirstLetter(@Query("f") letter: String): MealListResponse
+
+    @GET("list.php")
+    suspend fun getIngredientList(@Query("i") i: String = "list"): IngredientListResponse
+
+    @GET("filter.php")
+    suspend fun getMealsByIngredient(@Query("i") ingredient: String): MealListResponse
 }
