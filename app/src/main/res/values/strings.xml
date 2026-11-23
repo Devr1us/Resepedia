@@ -68,13 +68,24 @@
     <string name="area_argentinian">Argentinian</string>
     <string name="area_australian">Australian</string>
 
-    <!-- Pengaturan Tema & Bahasa -->
-    <string name="btn_change_language">Change Language</string>
-    <string name="btn_change_theme">Change Theme</string>
-    <string name="theme_dialog_title">Choose Theme</string>
-    <string name="theme_light">Light Mode</string>
-    <string name="theme_dark">Dark Mode</string>
-    <string name="lang_dialog_title">Choose Language</string>
+    <!-- Pengaturan (Settings) -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_about">About App</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_data_source">TheMealDB</string>
+    <string name="settings_data_source_note">Free open recipe database (tap to visit)</string>
+    <string name="settings_tech_stack_title">Tech Stack</string>
+    <string name="settings_tech_stack">Jetpack Compose, Material 3, Retrofit, Coil</string>
+    <string name="settings_developer">Developer</string>
+    <string name="settings_developer_name">Resepedia Team</string>
+    <string name="settings_disclaimer">Recipe content is provided by TheMealDB in English.</string>
+    <string name="btn_open_settings_desc">Open Settings</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
     <string name="lang_english">English</string>
     <string name="lang_indonesian">Bahasa Indonesia</string>
 

@@ -28,11 +28,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.RestaurantMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,9 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,7 +53,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.resepedia.R
-import com.example.resepedia.data.AppThemeMode
 import com.example.resepedia.model.MealSummary
 import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.UiState
@@ -69,10 +63,8 @@ import com.example.resepedia.ui.components.EmptyView
 import com.example.resepedia.ui.components.ErrorView
 import com.example.resepedia.ui.components.HeroRecipeCard
 import com.example.resepedia.ui.components.HeroSkeleton
-import com.example.resepedia.ui.components.LanguageSelectionDialog
 import com.example.resepedia.ui.components.RecipeCard
 import com.example.resepedia.ui.components.RecipeCardSkeleton
-import com.example.resepedia.ui.components.ThemeSelectionDialog
 import com.example.resepedia.ui.components.rememberShimmerBrush
 import com.example.resepedia.ui.theme.PrimaryOrange
 
@@ -80,6 +72,7 @@ import com.example.resepedia.ui.theme.PrimaryOrange
 fun DashboardScreen(
     viewModel: MainViewModel,
     onNavigateToDetail: (String) -> Unit,
+    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val heroState by viewModel.heroRecipeState.collectAsState()
@@ -89,40 +82,9 @@ fun DashboardScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
     val searchResultsState by viewModel.searchResultsState.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
-    val currentThemeMode by viewModel.themeMode.collectAsState()
     val translations by viewModel.translations.collectAsState()
     val shimmerBrush = rememberShimmerBrush()
-
-    var showThemeDialog by rememberSaveable { mutableStateOf(false) }
-    var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-
-    // Dialog Pengaturan Tema
-    if (showThemeDialog) {
-        ThemeSelectionDialog(
-            currentMode = currentThemeMode,
-            onSelectMode = { mode ->
-                viewModel.setThemeMode(mode)
-                showThemeDialog = false
-            },
-            onDismiss = { showThemeDialog = false }
-        )
-    }
-
-    // Dialog Pengaturan Bahasa
-    if (showLanguageDialog) {
-        LanguageSelectionDialog(
-            currentLanguage = viewModel.getLanguage(),
-            onSelectLanguage = { langCode ->
-                viewModel.setLanguage(langCode)
-                androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(
-                    androidx.core.os.LocaleListCompat.forLanguageTags(langCode)
-                )
-                showLanguageDialog = false
-            },
-            onDismiss = { showLanguageDialog = false }
-        )
-    }
 
     // Single LazyVerticalGrid utama (kolom tetap 2 di portrait maupun landscape)
     LazyVerticalGrid(
@@ -163,44 +125,20 @@ fun DashboardScreen(
                         }
                     }
 
-                    // Tombol Aksi: Bahasa & Tema (Jarak 16.dp, Tombol diperbesar menjadi 40.dp)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    // Tombol Pengaturan (Gerigi: 38.dp, bulat, latar surfaceVariant, tint primary)
+                    IconButton(
+                        onClick = onNavigateToSettings,
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-                        IconButton(
-                            onClick = { showLanguageDialog = true },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Translate,
-                                contentDescription = stringResource(R.string.btn_change_language),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-
-                        IconButton(
-                            onClick = { showThemeDialog = true },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            Icon(
-                                imageVector = if (currentThemeMode == AppThemeMode.DARK) {
-                                    Icons.Filled.DarkMode
-                                } else {
-                                    Icons.Filled.LightMode
-                                },
-                                contentDescription = stringResource(R.string.btn_change_theme),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = stringResource(R.string.btn_open_settings_desc),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
 

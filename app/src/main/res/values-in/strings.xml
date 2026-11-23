@@ -68,13 +68,24 @@
     <string name="area_argentinian">Argentina</string>
     <string name="area_australian">Australia</string>
 
-    <!-- Pengaturan Tema & Bahasa -->
-    <string name="btn_change_language">Ganti Bahasa</string>
-    <string name="btn_change_theme">Ganti Tema</string>
-    <string name="theme_dialog_title">Pilih Tema</string>
+    <!-- Pengaturan (Settings) -->
+    <string name="settings_title">Pengaturan</string>
+    <string name="settings_appearance">Tampilan</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_language">Bahasa</string>
+    <string name="settings_about">Tentang Aplikasi</string>
+    <string name="settings_version">Versi %1$s</string>
+    <string name="settings_data_source">TheMealDB</string>
+    <string name="settings_data_source_note">Database resep gratis (ketuk untuk membuka situs)</string>
+    <string name="settings_tech_stack_title">Teknologi</string>
+    <string name="settings_tech_stack">Jetpack Compose, Material 3, Retrofit, Coil</string>
+    <string name="settings_developer">Pengembang</string>
+    <string name="settings_developer_name">Tim Resepedia</string>
+    <string name="settings_disclaimer">Konten resep disediakan TheMealDB dalam bahasa Inggris.</string>
+    <string name="btn_open_settings_desc">Buka Pengaturan</string>
+    <string name="theme_system">Ikuti Sistem</string>
     <string name="theme_light">Mode Terang</string>
     <string name="theme_dark">Mode Gelap</string>
-    <string name="lang_dialog_title">Pilih Bahasa</string>
     <string name="lang_english">English</string>
     <string name="lang_indonesian">Bahasa Indonesia</string>
 

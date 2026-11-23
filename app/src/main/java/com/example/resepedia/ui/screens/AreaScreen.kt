@@ -74,6 +74,10 @@ fun AreaScreen(
     val translations by viewModel.translations.collectAsState()
     val shimmerBrush = rememberShimmerBrush()
 
+    val currentArea = selectedArea.orEmpty()
+    val translatedAreaName = if (selectedArea != null) areaDisplayName(currentArea) else ""
+    val flagEmoji = if (selectedArea != null) getAreaFlag(currentArea) else ""
+
     // Tangani tombol Back fisik/gesture saat berada di Mode B agar kembali ke Mode A
     BackHandler(enabled = selectedArea != null) {
         viewModel.clearSelectedArea()
@@ -124,7 +128,7 @@ fun AreaScreen(
                 is UiState.Error -> {
                     item(span = { GridItemSpan(maxLineSpan) }, key = "areas_error") {
                         ErrorView(
-                            message = state.message,
+                            description = state.message ?: stringResource(R.string.error_connection_desc),
                             onRetry = { viewModel.loadAreas(forceRefresh = true) }
                         )
                     }
@@ -160,10 +164,6 @@ fun AreaScreen(
             // ==========================================
             // MODE B: DAFTAR RESEP DARI NEGARA TERPILIH
             // ==========================================
-
-            val currentArea = selectedArea.orEmpty()
-            val translatedAreaName = areaDisplayName(currentArea)
-            val flagEmoji = getAreaFlag(currentArea)
 
             // Header Mode B dengan Tombol Kembali (Span Penuh)
             item(span = { GridItemSpan(maxLineSpan) }, key = "area_recipes_header") {
@@ -215,7 +215,7 @@ fun AreaScreen(
                 is UiState.Error -> {
                     item(span = { GridItemSpan(maxLineSpan) }, key = "area_meals_error") {
                         ErrorView(
-                            message = state.message,
+                            description = state.message ?: stringResource(R.string.error_connection_desc),
                             onRetry = { viewModel.loadMealsByArea(currentArea) }
                         )
                     }

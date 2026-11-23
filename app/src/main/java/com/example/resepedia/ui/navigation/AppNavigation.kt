@@ -33,6 +33,7 @@ import com.example.resepedia.ui.screens.AreaScreen
 import com.example.resepedia.ui.screens.DashboardScreen
 import com.example.resepedia.ui.screens.DetailScreen
 import com.example.resepedia.ui.screens.FavoritesScreen
+import com.example.resepedia.ui.screens.SettingsScreen
 import com.example.resepedia.ui.screens.SplashScreen
 
 @Composable
@@ -177,6 +178,9 @@ fun AppNavigation(
                     viewModel = viewModel,
                     onNavigateToDetail = { mealId ->
                         navController.navigate(Screen.Detail.createRoute(mealId))
+                    },
+                    onNavigateToSettings = {
+                        navController.navigate(Screen.Settings.route)
                     }
                 )
             }
@@ -208,6 +212,13 @@ fun AppNavigation(
                 val mealId = backStackEntry.arguments?.getString("mealId").orEmpty()
                 DetailScreen(
                     mealId = mealId,
+                    viewModel = viewModel,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.Settings.route) {
+                SettingsScreen(
                     viewModel = viewModel,
                     onNavigateBack = { navController.popBackStack() }
                 )
