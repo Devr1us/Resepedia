@@ -41,4 +41,24 @@ class RecipeRepository(
             }
         }
     }
+
+    /**
+     * Mengambil daftar negara/area dari TheMealDB (list.php?a=list).
+     * Memfilter nilai null, kosong, dan "Unknown", lalu mengurutkannya secara alfabetis (A-Z).
+     */
+    suspend fun getAreas(): List<String> = withContext(Dispatchers.IO) {
+        apiService.getAreas().meals
+            ?.mapNotNull { it.strArea?.trim() }
+            ?.filter { it.isNotBlank() && !it.equals("Unknown", ignoreCase = true) }
+            ?.distinct()
+            ?.sorted()
+            ?: emptyList()
+    }
+
+    /**
+     * Mengambil daftar resep berdasarkan asal negara/area (filter.php?a=).
+     */
+    suspend fun getMealsByArea(area: String): List<MealSummary> = withContext(Dispatchers.IO) {
+        apiService.getMealsByArea(area).meals ?: emptyList()
+    }
 }

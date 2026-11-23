@@ -30,6 +30,19 @@ data class CategoryItem(
 )
 
 /**
+ * Respons API untuk daftar negara / area (list.php?a=list)
+ */
+data class AreaResponse(
+    @SerializedName("meals")
+    val meals: List<AreaItem>?
+)
+
+data class AreaItem(
+    @SerializedName("strArea")
+    val strArea: String?
+)
+
+/**
  * Respons API untuk daftar resep per kategori (filter.php) dan pencarian (search.php)
  */
 data class MealListResponse(

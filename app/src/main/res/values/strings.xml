@@ -16,11 +16,57 @@
     <string name="recipes_by_category">Recipes in %1$s</string>
     <string name="all_categories">All Categories</string>
 
-    <!-- Navigasi Bawah -->
+    <!-- Navigasi Bawah & Layar Jelajah Negara -->
     <string name="nav_home">Home</string>
+    <string name="nav_areas">Cuisines</string>
     <string name="nav_favorite">Favorites</string>
     <string name="nav_home_desc">Navigate to Home</string>
+    <string name="nav_areas_desc">Navigate to Explore Cuisines</string>
     <string name="nav_favorite_desc">Navigate to Favorites</string>
+    <string name="areas_title">Explore Cuisines</string>
+    <string name="areas_subtitle">Discover signature dishes from around the globe</string>
+    <string name="areas_recipes_title">Recipes from %1$s</string>
+    <string name="areas_empty_title">No Recipes Found</string>
+    <string name="areas_empty_desc">No recipes are available for this country yet.</string>
+    <string name="btn_back_to_areas">Back to Countries</string>
+
+    <!-- Nama Area / Negara (Bahasa Inggris) -->
+    <string name="area_american">American</string>
+    <string name="area_british">British</string>
+    <string name="area_canadian">Canadian</string>
+    <string name="area_chinese">Chinese</string>
+    <string name="area_croatian">Croatian</string>
+    <string name="area_dutch">Dutch</string>
+    <string name="area_egyptian">Egyptian</string>
+    <string name="area_filipino">Filipino</string>
+    <string name="area_french">French</string>
+    <string name="area_greek">Greek</string>
+    <string name="area_indian">Indian</string>
+    <string name="area_irish">Irish</string>
+    <string name="area_italian">Italian</string>
+    <string name="area_jamaican">Jamaican</string>
+    <string name="area_japanese">Japanese</string>
+    <string name="area_kenyan">Kenyan</string>
+    <string name="area_malaysian">Malaysian</string>
+    <string name="area_mexican">Mexican</string>
+    <string name="area_moroccan">Moroccan</string>
+    <string name="area_polish">Polish</string>
+    <string name="area_portuguese">Portuguese</string>
+    <string name="area_russian">Russian</string>
+    <string name="area_spanish">Spanish</string>
+    <string name="area_thai">Thai</string>
+    <string name="area_tunisian">Tunisian</string>
+    <string name="area_turkish">Turkish</string>
+    <string name="area_ukrainian">Ukrainian</string>
+    <string name="area_uruguayan">Uruguayan</string>
+    <string name="area_vietnamese">Vietnamese</string>
+    <string name="area_indonesian">Indonesian</string>
+    <string name="area_norwegian">Norwegian</string>
+    <string name="area_saudi_arabian">Saudi Arabian</string>
+    <string name="area_syrian">Syrian</string>
+    <string name="area_algerian">Algerian</string>
+    <string name="area_argentinian">Argentinian</string>
+    <string name="area_australian">Australian</string>
 
     <!-- Pengaturan Tema & Bahasa -->
     <string name="btn_change_language">Change Language</string>

@@ -1,5 +1,6 @@
 package com.example.resepedia.network
 
+import com.example.resepedia.model.AreaResponse
 import com.example.resepedia.model.CategoryResponse
 import com.example.resepedia.model.MealDetailResponse
 import com.example.resepedia.model.MealListResponse
@@ -22,4 +23,10 @@ interface MealApiService {
 
     @GET("random.php")
     suspend fun getRandomMeal(): MealDetailResponse
+
+    @GET("list.php")
+    suspend fun getAreas(@Query("a") a: String = "list"): AreaResponse
+
+    @GET("filter.php")
+    suspend fun getMealsByArea(@Query("a") area: String): MealListResponse
 }

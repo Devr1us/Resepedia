@@ -73,6 +73,16 @@ class MainViewModel(
     private val _favoritesState = MutableStateFlow<UiState<List<MealSummary>>>(UiState.Success(emptyList()))
     val favoritesState: StateFlow<UiState<List<MealSummary>>> = _favoritesState.asStateFlow()
 
+    // State Jelajah Negara / Area
+    private val _areasState = MutableStateFlow<UiState<List<String>>>(UiState.Loading)
+    val areasState: StateFlow<UiState<List<String>>> = _areasState.asStateFlow()
+
+    private val _selectedArea = MutableStateFlow<String?>(null)
+    val selectedArea: StateFlow<String?> = _selectedArea.asStateFlow()
+
+    private val _mealsByAreaState = MutableStateFlow<UiState<List<MealSummary>>>(UiState.Loading)
+    val mealsByAreaState: StateFlow<UiState<List<MealSummary>>> = _mealsByAreaState.asStateFlow()
+
     // State Detail Resep yang sedang dibuka
     private val _detailMealState = MutableStateFlow<UiState<MealDetail>>(UiState.Loading)
     val detailMealState: StateFlow<UiState<MealDetail>> = _detailMealState.asStateFlow()
@@ -250,6 +260,55 @@ class MainViewModel(
     }
 
     /**
+     * Memuat daftar negara/area sekali saja. Tidak dimuat ulang saat berpindah tab
+     * kecuali jika forceRefresh = true (misal saat tap retry pada ErrorView).
+     */
+    fun loadAreas(forceRefresh: Boolean = false) {
+        if (!forceRefresh && _areasState.value is UiState.Success) return
+        viewModelScope.launch {
+            _areasState.value = UiState.Loading
+            try {
+                val areas = repository.getAreas()
+                _areasState.value = UiState.Success(areas)
+            } catch (e: Exception) {
+                _areasState.value = UiState.Error(e.localizedMessage)
+            }
+        }
+    }
+
+    /**
+     * Memilih negara dan memuat daftar resep dari negara tersebut.
+     */
+    fun selectArea(area: String) {
+        _selectedArea.value = area
+        loadMealsByArea(area)
+    }
+
+    /**
+     * Menghapus negara terpilih untuk kembali ke daftar negara (Mode A).
+     */
+    fun clearSelectedArea() {
+        _selectedArea.value = null
+    }
+
+    /**
+     * Memuat daftar resep berdasarkan negara terpilih.
+     */
+    fun loadMealsByArea(area: String) {
+        viewModelScope.launch {
+            _mealsByAreaState.value = UiState.Loading
+            try {
+                val meals = repository.getMealsByArea(area)
+                _mealsByAreaState.value = UiState.Success(meals)
+                // Terjemahkan nama resep jika bahasa Indonesia aktif
+                translateTexts(meals.map { it.strMeal })
+            } catch (e: Exception) {
+                _mealsByAreaState.value = UiState.Error(e.localizedMessage)
+            }
+        }
+    }
+
+    /**
      * Menerjemahkan kumpulan teks jika bahasa bukan Inggris dan teks belum ada di cache terjemahan.
      */
     private fun translateTexts(texts: Collection<String?>) {
@@ -318,6 +377,12 @@ class MainViewModel(
         val favorites = _favoritesState.value
         if (favorites is UiState.Success) {
             textsToTranslate.addAll(favorites.data.map { it.strMeal })
+        }
+
+        // 6. Resep per Negara
+        val mealsByArea = _mealsByAreaState.value
+        if (mealsByArea is UiState.Success) {
+            textsToTranslate.addAll(mealsByArea.data.map { it.strMeal })
         }
 
         translateTexts(textsToTranslate)

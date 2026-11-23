@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -27,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.resepedia.R
 import com.example.resepedia.ui.MainViewModel
+import com.example.resepedia.ui.screens.AreaScreen
 import com.example.resepedia.ui.screens.DashboardScreen
 import com.example.resepedia.ui.screens.DetailScreen
 import com.example.resepedia.ui.screens.FavoritesScreen
@@ -41,8 +44,10 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Tampilkan bottom navigation bar hanya pada dashboard dan favorites
-    val showBottomBar = currentRoute == Screen.Dashboard.route || currentRoute == Screen.Favorites.route
+    // Tampilkan bottom navigation bar pada Dashboard, Areas (Negara), dan Favorites
+    val showBottomBar = currentRoute == Screen.Dashboard.route ||
+            currentRoute == Screen.Areas.route ||
+            currentRoute == Screen.Favorites.route
 
     // Tentukan startDestination: jika splash sudah pernah tampil, langsung ke Dashboard
     val startDestination = if (viewModel.splashShown) Screen.Dashboard.route else Screen.Splash.route
@@ -55,7 +60,7 @@ fun AppNavigation(
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.primary
                 ) {
-                    // Item Beranda
+                    // 1. Item Beranda
                     val isHomeSelected = currentRoute == Screen.Dashboard.route
                     NavigationBarItem(
                         selected = isHomeSelected,
@@ -86,7 +91,38 @@ fun AppNavigation(
                         )
                     )
 
-                    // Item Favorit
+                    // 2. Item Negara (Jelajah Negara)
+                    val isAreasSelected = currentRoute == Screen.Areas.route
+                    NavigationBarItem(
+                        selected = isAreasSelected,
+                        onClick = {
+                            if (!isAreasSelected) {
+                                navController.navigate(Screen.Areas.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = if (isAreasSelected) Icons.Filled.Public else Icons.Outlined.Public,
+                                contentDescription = stringResource(R.string.nav_areas_desc)
+                            )
+                        },
+                        label = { Text(text = stringResource(R.string.nav_areas)) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    )
+
+                    // 3. Item Favorit
                     val isFavSelected = currentRoute == Screen.Favorites.route
                     NavigationBarItem(
                         selected = isFavSelected,
@@ -138,6 +174,15 @@ fun AppNavigation(
 
             composable(Screen.Dashboard.route) {
                 DashboardScreen(
+                    viewModel = viewModel,
+                    onNavigateToDetail = { mealId ->
+                        navController.navigate(Screen.Detail.createRoute(mealId))
+                    }
+                )
+            }
+
+            composable(Screen.Areas.route) {
+                AreaScreen(
                     viewModel = viewModel,
                     onNavigateToDetail = { mealId ->
                         navController.navigate(Screen.Detail.createRoute(mealId))

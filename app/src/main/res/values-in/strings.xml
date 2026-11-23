@@ -16,11 +16,57 @@
     <string name="recipes_by_category">Resep Kategori %1$s</string>
     <string name="all_categories">Semua Kategori</string>
 
-    <!-- Navigasi Bawah -->
+    <!-- Navigasi Bawah & Layar Jelajah Negara -->
     <string name="nav_home">Beranda</string>
+    <string name="nav_areas">Negara</string>
     <string name="nav_favorite">Favorit</string>
     <string name="nav_home_desc">Navigasi ke Beranda</string>
+    <string name="nav_areas_desc">Navigasi ke Jelajah Negara</string>
     <string name="nav_favorite_desc">Navigasi ke Favorit</string>
+    <string name="areas_title">Jelajah Negara</string>
+    <string name="areas_subtitle">Temukan aneka hidangan khas dari berbagai penjuru dunia</string>
+    <string name="areas_recipes_title">Resep dari %1$s</string>
+    <string name="areas_empty_title">Tidak Ada Resep</string>
+    <string name="areas_empty_desc">Belum ada resep yang tersedia untuk negara ini.</string>
+    <string name="btn_back_to_areas">Kembali ke Daftar Negara</string>
+
+    <!-- Nama Area / Negara (Bahasa Indonesia) -->
+    <string name="area_american">Amerika</string>
+    <string name="area_british">Inggris</string>
+    <string name="area_canadian">Kanada</string>
+    <string name="area_chinese">Tiongkok</string>
+    <string name="area_croatian">Kroasia</string>
+    <string name="area_dutch">Belanda</string>
+    <string name="area_egyptian">Mesir</string>
+    <string name="area_filipino">Filipina</string>
+    <string name="area_french">Prancis</string>
+    <string name="area_greek">Yunani</string>
+    <string name="area_indian">India</string>
+    <string name="area_irish">Irlandia</string>
+    <string name="area_italian">Italia</string>
+    <string name="area_jamaican">Jamaika</string>
+    <string name="area_japanese">Jepang</string>
+    <string name="area_kenyan">Kenya</string>
+    <string name="area_malaysian">Malaysia</string>
+    <string name="area_mexican">Meksiko</string>
+    <string name="area_moroccan">Maroko</string>
+    <string name="area_polish">Polandia</string>
+    <string name="area_portuguese">Portugal</string>
+    <string name="area_russian">Rusia</string>
+    <string name="area_spanish">Spanyol</string>
+    <string name="area_thai">Thailand</string>
+    <string name="area_tunisian">Tunisia</string>
+    <string name="area_turkish">Turki</string>
+    <string name="area_ukrainian">Ukraina</string>
+    <string name="area_uruguayan">Uruguay</string>
+    <string name="area_vietnamese">Vietnam</string>
+    <string name="area_indonesian">Indonesia</string>
+    <string name="area_norwegian">Norwegia</string>
+    <string name="area_saudi_arabian">Arab Saudi</string>
+    <string name="area_syrian">Suriah</string>
+    <string name="area_algerian">Aljazair</string>
+    <string name="area_argentinian">Argentina</string>
+    <string name="area_australian">Australia</string>
 
     <!-- Pengaturan Tema & Bahasa -->
     <string name="btn_change_language">Ganti Bahasa</string>
