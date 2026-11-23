@@ -64,13 +64,16 @@ import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.UiState
 import com.example.resepedia.ui.components.AppLogo
 import com.example.resepedia.ui.components.CategoryChip
+import com.example.resepedia.ui.components.CategoryChipSkeleton
 import com.example.resepedia.ui.components.EmptyView
 import com.example.resepedia.ui.components.ErrorView
 import com.example.resepedia.ui.components.HeroRecipeCard
+import com.example.resepedia.ui.components.HeroSkeleton
 import com.example.resepedia.ui.components.LanguageSelectionDialog
-import com.example.resepedia.ui.components.LoadingView
 import com.example.resepedia.ui.components.RecipeCard
+import com.example.resepedia.ui.components.RecipeCardSkeleton
 import com.example.resepedia.ui.components.ThemeSelectionDialog
+import com.example.resepedia.ui.components.rememberShimmerBrush
 import com.example.resepedia.ui.theme.PrimaryOrange
 
 @Composable
@@ -88,6 +91,7 @@ fun DashboardScreen(
     val favoriteIds by viewModel.favoriteIds.collectAsState()
     val currentThemeMode by viewModel.themeMode.collectAsState()
     val translations by viewModel.translations.collectAsState()
+    val shimmerBrush = rememberShimmerBrush()
 
     var showThemeDialog by rememberSaveable { mutableStateOf(false) }
     var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
@@ -275,8 +279,8 @@ fun DashboardScreen(
 
             when (val result = searchResultsState) {
                 is UiState.Loading -> {
-                    item(span = { GridItemSpan(maxLineSpan) }, key = "search_loading") {
-                        LoadingView()
+                    items(count = 6, key = { "skeleton_search_$it" }) {
+                        RecipeCardSkeleton(brush = shimmerBrush)
                     }
                 }
                 is UiState.Error -> {
@@ -317,16 +321,7 @@ fun DashboardScreen(
             item(span = { GridItemSpan(maxLineSpan) }, key = "hero_section") {
                 when (val hero = heroState) {
                     is UiState.Loading -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(220.dp)
-                                .clip(RoundedCornerShape(24.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            LoadingView()
-                        }
+                        HeroSkeleton(brush = shimmerBrush)
                     }
                     is UiState.Error -> {
                         ErrorView(onRetry = { viewModel.loadHeroRecipe() })
@@ -371,7 +366,7 @@ fun DashboardScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     when (val catState = categoriesState) {
-                        is UiState.Loading -> LoadingView()
+                        is UiState.Loading -> CategoryChipSkeleton(brush = shimmerBrush)
                         is UiState.Error -> ErrorView(onRetry = { viewModel.loadCategories() })
                         is UiState.Success -> {
                             LazyRow(
@@ -410,8 +405,8 @@ fun DashboardScreen(
             // 6. Daftar Resep per Kategori (2 Kolom Tetap)
             when (val mealsState = recipesByCategoryState) {
                 is UiState.Loading -> {
-                    item(span = { GridItemSpan(maxLineSpan) }, key = "meals_loading") {
-                        LoadingView()
+                    items(count = 6, key = { "skeleton_recipe_$it" }) {
+                        RecipeCardSkeleton(brush = shimmerBrush)
                     }
                 }
                 is UiState.Error -> {

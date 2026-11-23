@@ -56,8 +56,8 @@ import coil3.compose.AsyncImage
 import com.example.resepedia.R
 import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.UiState
+import com.example.resepedia.ui.components.DetailSkeleton
 import com.example.resepedia.ui.components.ErrorView
-import com.example.resepedia.ui.components.LoadingView
 import com.example.resepedia.ui.theme.AccentGreen
 import com.example.resepedia.ui.theme.HeartRed
 import com.example.resepedia.ui.theme.PrimaryOrange
@@ -84,14 +84,7 @@ fun DetailScreen(
 
     when (val state = detailState) {
         is UiState.Loading -> {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingView()
-            }
+            DetailSkeleton(modifier = modifier)
         }
         is UiState.Error -> {
             Box(

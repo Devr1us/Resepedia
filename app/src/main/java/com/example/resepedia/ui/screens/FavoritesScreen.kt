@@ -28,8 +28,8 @@ import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.UiState
 import com.example.resepedia.ui.components.EmptyView
 import com.example.resepedia.ui.components.ErrorView
-import com.example.resepedia.ui.components.LoadingView
 import com.example.resepedia.ui.components.RecipeCard
+import com.example.resepedia.ui.components.RecipeCardSkeleton
 
 @Composable
 fun FavoritesScreen(
@@ -71,8 +71,8 @@ fun FavoritesScreen(
 
             when (val state = favoritesState) {
                 is UiState.Loading -> {
-                    item(span = { GridItemSpan(maxLineSpan) }, key = "fav_loading") {
-                        LoadingView()
+                    items(count = 6, key = { "skeleton_fav_$it" }) {
+                        RecipeCardSkeleton()
                     }
                 }
                 is UiState.Error -> {
