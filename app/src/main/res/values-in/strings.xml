@@ -38,7 +38,7 @@
     <string name="areas_recipe_search_results_count">%1$d resep ditemukan</string>
     <string name="areas_empty_country_title">Belum Ada Resep dari %1$s</string>
     <string name="areas_empty_country_desc">Database TheMealDB belum memiliki koleksi resep untuk negara ini.</string>
-    <string name="areas_btn_surprise_me">Lihat Resep Acak</string>
+    <string name="areas_btn_surprise_me">Coba Resep Acak</string>
     <string name="areas_btn_other_countries">Jelajahi Negara Lain</string>
 
     <!-- Nama Area / Negara (Bahasa Indonesia) -->

@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
 import com.example.resepedia.R
 import com.example.resepedia.ui.theme.Motion
+import com.example.resepedia.ui.util.rememberWindowInfo
 
 /**
  * Kartu Negara / Area masakan untuk layar Jelajah Negara.
@@ -57,6 +58,9 @@ fun AreaCard(
     recipeCount: Int? = null,
     flagUrl: String? = null
 ) {
+    val windowInfo = rememberWindowInfo()
+    val isCompact = windowInfo.isCompactHeight
+
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val pressScale by animateFloatAsState(
@@ -92,32 +96,38 @@ fun AreaCard(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 20.dp, horizontal = 12.dp)
+                .padding(vertical = if (isCompact) 14.dp else 20.dp, horizontal = 12.dp)
         ) {
             // Bendera Negara (FlagCDN via Coil dengan emoji sebagai fallback instan)
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.size(height = 36.dp, width = 50.dp)
+                modifier = Modifier.size(
+                    height = if (isCompact) 30.dp else 36.dp,
+                    width = if (isCompact) 44.dp else 50.dp
+                )
             ) {
                 if (!flagUrl.isNullOrBlank()) {
                     SubcomposeAsyncImage(
                         model = flagUrl,
                         contentDescription = displayName,
                         modifier = Modifier
-                            .size(width = 46.dp, height = 30.dp)
+                            .size(
+                                width = if (isCompact) 40.dp else 46.dp,
+                                height = if (isCompact) 26.dp else 30.dp
+                            )
                             .clip(RoundedCornerShape(4.dp)),
                         contentScale = ContentScale.Crop,
                         loading = {
                             Text(
                                 text = flagEmoji,
-                                fontSize = 32.sp,
+                                fontSize = if (isCompact) 26.sp else 32.sp,
                                 textAlign = TextAlign.Center
                             )
                         },
                         error = {
                             Text(
                                 text = flagEmoji,
-                                fontSize = 32.sp,
+                                fontSize = if (isCompact) 26.sp else 32.sp,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -125,7 +135,7 @@ fun AreaCard(
                 } else {
                     Text(
                         text = flagEmoji,
-                        fontSize = 34.sp,
+                        fontSize = if (isCompact) 28.sp else 34.sp,
                         textAlign = TextAlign.Center
                     )
                 }

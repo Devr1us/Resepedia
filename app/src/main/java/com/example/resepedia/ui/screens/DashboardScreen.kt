@@ -69,6 +69,7 @@ import com.example.resepedia.ui.components.rememberShimmerBrush
 import com.example.resepedia.ui.theme.PrimaryOrange
 import com.example.resepedia.ui.theme.staggeredEntrance
 import com.example.resepedia.ui.util.ShakeEffect
+import com.example.resepedia.ui.util.rememberWindowInfo
 import com.example.resepedia.ui.util.responsiveGridCells
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -97,6 +98,9 @@ fun DashboardScreen(
     val favoriteIds by viewModel.favoriteIds.collectAsState()
     val translations by viewModel.translations.collectAsState()
     val shimmerBrush = rememberShimmerBrush()
+
+    val windowInfo = rememberWindowInfo()
+    val isCompactHeight = windowInfo.isCompactHeight
 
     // State untuk fitur Surprise Me & Shake
     val snackbarHostState = remember { SnackbarHostState() }
@@ -212,15 +216,22 @@ fun DashboardScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(if (isCompactHeight) 8.dp else 14.dp))
 
                     // Sapaan Ramah
                     Text(
                         text = stringResource(R.string.greeting_title),
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            lineHeight = 28.sp
-                        ),
+                        style = if (isCompactHeight) {
+                            MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                lineHeight = 24.sp
+                            )
+                        } else {
+                            MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                lineHeight = 28.sp
+                            )
+                        },
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 }
@@ -236,7 +247,7 @@ fun DashboardScreen(
                     shadowElevation = 1.dp,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp)
+                        .height(if (isCompactHeight) 48.dp else 54.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

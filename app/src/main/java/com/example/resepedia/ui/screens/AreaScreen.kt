@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -25,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Public
@@ -32,6 +35,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +60,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.resepedia.R
@@ -72,6 +77,7 @@ import com.example.resepedia.ui.theme.staggeredEntrance
 import com.example.resepedia.ui.util.AreaFlags
 import com.example.resepedia.ui.util.getAreaDisplayName
 import com.example.resepedia.ui.util.getAreaFlag
+import com.example.resepedia.ui.util.rememberWindowInfo
 import com.example.resepedia.ui.util.responsiveGridCells
 import java.text.Normalizer
 import java.util.Locale
@@ -97,12 +103,17 @@ fun AreaScreen(
         viewModel.loadAreas()
     }
 
+    val windowInfo = rememberWindowInfo()
+    val isLandscape = windowInfo.isLandscape
+    val isCompactHeight = windowInfo.isCompactHeight
+
     val areasState by viewModel.areasState.collectAsState()
     val selectedArea by viewModel.selectedArea.collectAsState()
     val mealsByAreaState by viewModel.mealsByAreaState.collectAsState()
     val recipeCounts by viewModel.areaRecipeCounts.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
     val translations by viewModel.translations.collectAsState()
+    val isSurpriseLoading by viewModel.isSurpriseLoading.collectAsState()
     val shimmerBrush = rememberShimmerBrush()
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -193,12 +204,18 @@ fun AreaScreen(
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = stringResource(R.string.areas_title),
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
+                        style = if (isCompactHeight) {
+                            MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        } else {
+                            MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
                         color = MaterialTheme.colorScheme.onBackground
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(if (isCompactHeight) 2.dp else 4.dp))
                     Text(
                         text = stringResource(R.string.areas_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
@@ -293,7 +310,7 @@ fun AreaScreen(
                             viewModel.clearSelectedArea()
                         },
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(if (isCompactHeight) 36.dp else 40.dp)
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
@@ -310,9 +327,15 @@ fun AreaScreen(
                     Column {
                         Text(
                             text = stringResource(R.string.areas_recipes_title, translatedAreaName),
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
+                            style = if (isCompactHeight) {
+                                MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                )
+                            } else {
+                                MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold
+                                )
+                            },
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
@@ -343,66 +366,183 @@ fun AreaScreen(
                     if (meals.isEmpty()) {
                         // Tampilan informatif khusus negara yang belum memiliki resep di database
                         item(span = { GridItemSpan(maxLineSpan) }, key = "empty_country_recipes") {
-                            Card(
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 12.dp),
-                                shape = RoundedCornerShape(24.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surface
-                                ),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                                    .padding(vertical = if (isCompactHeight) 8.dp else 16.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center,
+                                Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(24.dp)
+                                        .widthIn(max = 520.dp),
+                                    shape = RoundedCornerShape(24.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surface
+                                    ),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                                 ) {
-                                    Text(
-                                        text = flagEmoji,
-                                        fontSize = 48.sp,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    Text(
-                                        text = stringResource(R.string.areas_empty_country_title, translatedAreaName),
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = stringResource(R.string.areas_empty_country_desc),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(20.dp))
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(if (isCompactHeight) 16.dp else 24.dp)
                                     ) {
-                                        OutlinedButton(
-                                            onClick = { viewModel.clearSelectedArea() },
-                                            shape = RoundedCornerShape(12.dp)
-                                        ) {
-                                            Text(text = stringResource(R.string.areas_btn_other_countries))
-                                        }
-                                        Button(
-                                            onClick = {
-                                                viewModel.fetchRandomMeal(
-                                                    onSuccess = onNavigateToDetail,
-                                                    onError = { /* abaikan */ }
-                                                )
-                                            },
-                                            shape = RoundedCornerShape(12.dp),
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.primary
-                                            )
-                                        ) {
-                                            Text(text = stringResource(R.string.areas_btn_surprise_me))
+                                        Text(
+                                            text = flagEmoji,
+                                            fontSize = if (isCompactHeight) 38.sp else 48.sp,
+                                            textAlign = TextAlign.Center
+                                        )
+                                        Spacer(modifier = Modifier.height(if (isCompactHeight) 8.dp else 12.dp))
+                                        Text(
+                                            text = stringResource(R.string.areas_empty_country_title, translatedAreaName),
+                                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            textAlign = TextAlign.Center
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = stringResource(R.string.areas_empty_country_desc),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            textAlign = TextAlign.Center
+                                        )
+                                        Spacer(modifier = Modifier.height(if (isCompactHeight) 14.dp else 20.dp))
+
+                                        // Tombol Aksi: Bersisian di Landscape (Row dengan weight 1f), Tumpuk di Portrait (Column)
+                                        if (isLandscape) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                OutlinedButton(
+                                                    onClick = { viewModel.clearSelectedArea() },
+                                                    shape = RoundedCornerShape(12.dp),
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .height(46.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Outlined.Public,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Text(
+                                                        text = stringResource(R.string.areas_btn_other_countries),
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                }
+
+                                                Button(
+                                                    onClick = {
+                                                        viewModel.fetchRandomMeal(
+                                                            onSuccess = onNavigateToDetail,
+                                                            onError = { /* abaikan */ }
+                                                        )
+                                                    },
+                                                    enabled = !isSurpriseLoading,
+                                                    shape = RoundedCornerShape(12.dp),
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = MaterialTheme.colorScheme.primary
+                                                    ),
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .height(46.dp)
+                                                ) {
+                                                    if (isSurpriseLoading) {
+                                                        CircularProgressIndicator(
+                                                            modifier = Modifier.size(18.dp),
+                                                            strokeWidth = 2.dp,
+                                                            color = MaterialTheme.colorScheme.onPrimary
+                                                        )
+                                                        Spacer(modifier = Modifier.width(6.dp))
+                                                        Text(
+                                                            text = stringResource(R.string.surprise_me_loading),
+                                                            maxLines = 1,
+                                                            overflow = TextOverflow.Ellipsis
+                                                        )
+                                                    } else {
+                                                        Icon(
+                                                            imageVector = Icons.Filled.Casino,
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(18.dp)
+                                                        )
+                                                        Spacer(modifier = Modifier.width(6.dp))
+                                                        Text(
+                                                            text = stringResource(R.string.areas_btn_surprise_me),
+                                                            maxLines = 1,
+                                                            overflow = TextOverflow.Ellipsis
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            Column(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Button(
+                                                    onClick = {
+                                                        viewModel.fetchRandomMeal(
+                                                            onSuccess = onNavigateToDetail,
+                                                            onError = { /* abaikan */ }
+                                                        )
+                                                    },
+                                                    enabled = !isSurpriseLoading,
+                                                    shape = RoundedCornerShape(14.dp),
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = MaterialTheme.colorScheme.primary
+                                                    ),
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(48.dp)
+                                                ) {
+                                                    if (isSurpriseLoading) {
+                                                        CircularProgressIndicator(
+                                                            modifier = Modifier.size(18.dp),
+                                                            strokeWidth = 2.dp,
+                                                            color = MaterialTheme.colorScheme.onPrimary
+                                                        )
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                        Text(text = stringResource(R.string.surprise_me_loading))
+                                                    } else {
+                                                        Icon(
+                                                            imageVector = Icons.Filled.Casino,
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(20.dp)
+                                                        )
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                        Text(
+                                                            text = stringResource(R.string.areas_btn_surprise_me),
+                                                            fontWeight = FontWeight.SemiBold
+                                                        )
+                                                    }
+                                                }
+
+                                                OutlinedButton(
+                                                    onClick = { viewModel.clearSelectedArea() },
+                                                    shape = RoundedCornerShape(14.dp),
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(48.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Outlined.Public,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                    Text(
+                                                        text = stringResource(R.string.areas_btn_other_countries),
+                                                        fontWeight = FontWeight.Medium
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -486,6 +626,9 @@ private fun AreaSearchBar(
     onSearchAction: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val windowInfo = rememberWindowInfo()
+    val isCompact = windowInfo.isCompactHeight
+
     Surface(
         shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.surface,
@@ -493,7 +636,7 @@ private fun AreaSearchBar(
         shadowElevation = 1.dp,
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp)
+            .height(if (isCompact) 46.dp else 52.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
