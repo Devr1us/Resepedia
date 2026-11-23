@@ -314,14 +314,7 @@ fun DashboardScreen(
 
                     when (val catState = categoriesState) {
                         is UiState.Loading -> {
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                items(count = 5) {
-                                    CategoryChipSkeleton(brush = shimmerBrush)
-                                }
-                            }
+                            CategoryChipSkeleton(brush = shimmerBrush)
                         }
                         is UiState.Error -> {
                             ErrorView(onRetry = { viewModel.loadCategories() })

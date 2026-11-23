@@ -354,7 +354,9 @@ private fun ResepediaNavHost(
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
             enterTransition = {
                 slideInHorizontally(
                     initialOffsetX = { (it * 0.15f).toInt() },

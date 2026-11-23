@@ -216,6 +216,41 @@ fun RecipeCardSkeleton(
 }
 
 /**
+ * Skeleton untuk chip kategori individual (CategoryChip).
+ */
+@Composable
+fun SingleCategoryChipSkeleton(
+    modifier: Modifier = Modifier,
+    brush: Brush = rememberShimmerBrush()
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .width(76.dp)
+            .padding(vertical = 4.dp)
+    ) {
+        // Lingkaran gambar kategori (60.dp)
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .clip(CircleShape)
+                .shimmer(brush)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Label nama kategori
+        Box(
+            modifier = Modifier
+                .width(50.dp)
+                .height(12.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .shimmer(brush)
+        )
+    }
+}
+
+/**
  * Skeleton untuk baris horizontal chip kategori (CategoryChip).
  */
 @Composable
@@ -229,35 +264,11 @@ fun CategoryChipSkeleton(
         modifier = modifier
             .fillMaxWidth()
             .semantics { contentDescription = loadingDesc },
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 2.dp)
     ) {
         items(count) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .width(76.dp)
-                    .padding(vertical = 4.dp)
-            ) {
-                // Lingkaran gambar kategori (60.dp)
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                        .shimmer(brush)
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Label nama kategori
-                Box(
-                    modifier = Modifier
-                        .width(50.dp)
-                        .height(12.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .shimmer(brush)
-                )
-            }
+            SingleCategoryChipSkeleton(brush = brush)
         }
     }
 }
