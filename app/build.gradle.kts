@@ -68,6 +68,9 @@ dependencies {
     // ML Kit On-Device Translation
     implementation(libs.mlkit.translate)
 
+    // Core SplashScreen API
+    implementation(libs.androidx.core.splashscreen)
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

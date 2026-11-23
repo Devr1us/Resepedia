@@ -62,6 +62,7 @@ import com.example.resepedia.data.AppThemeMode
 import com.example.resepedia.model.MealSummary
 import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.UiState
+import com.example.resepedia.ui.components.AppLogo
 import com.example.resepedia.ui.components.CategoryChip
 import com.example.resepedia.ui.components.EmptyView
 import com.example.resepedia.ui.components.ErrorView
@@ -139,20 +140,7 @@ fun DashboardScreen(
                 ) {
                     // Logo & Brand Name
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            shape = CircleShape,
-                            color = PrimaryOrange,
-                            modifier = Modifier.size(42.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Filled.MenuBook,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        }
+                        AppLogo(size = 42.dp)
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(

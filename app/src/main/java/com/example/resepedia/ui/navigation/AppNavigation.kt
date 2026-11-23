@@ -30,6 +30,7 @@ import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.screens.DashboardScreen
 import com.example.resepedia.ui.screens.DetailScreen
 import com.example.resepedia.ui.screens.FavoritesScreen
+import com.example.resepedia.ui.screens.SplashScreen
 
 @Composable
 fun AppNavigation(
@@ -42,6 +43,9 @@ fun AppNavigation(
 
     // Tampilkan bottom navigation bar hanya pada dashboard dan favorites
     val showBottomBar = currentRoute == Screen.Dashboard.route || currentRoute == Screen.Favorites.route
+
+    // Tentukan startDestination: jika splash sudah pernah tampil, langsung ke Dashboard
+    val startDestination = if (viewModel.splashShown) Screen.Dashboard.route else Screen.Splash.route
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -118,9 +122,20 @@ fun AppNavigation(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Dashboard.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(Screen.Splash.route) {
+                SplashScreen(
+                    onSplashFinished = {
+                        viewModel.markSplashShown()
+                        navController.navigate(Screen.Dashboard.route) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
             composable(Screen.Dashboard.route) {
                 DashboardScreen(
                     viewModel = viewModel,

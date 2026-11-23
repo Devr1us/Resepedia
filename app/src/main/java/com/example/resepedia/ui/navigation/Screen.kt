@@ -1,6 +1,7 @@
 package com.example.resepedia.ui.navigation
 
 sealed class Screen(val route: String) {
+    data object Splash : Screen("splash")
     data object Dashboard : Screen("dashboard")
     data object Favorites : Screen("favorites")
     data object Detail : Screen("detail/{mealId}") {

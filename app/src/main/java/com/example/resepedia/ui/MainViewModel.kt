@@ -38,6 +38,14 @@ class MainViewModel(
     val themeMode: StateFlow<AppThemeMode> = preferencesManager.themeMode
     val favoriteIds: StateFlow<Set<String>> = preferencesManager.favoriteIds
 
+    // Flag untuk memastikan Splash Screen hanya tampil satu kali per proses aplikasi
+    var splashShown: Boolean = false
+        private set
+
+    fun markSplashShown() {
+        splashShown = true
+    }
+
     // State Hero Recipe (Resep Hari Ini)
     private val _heroRecipeState = MutableStateFlow<UiState<MealDetail>>(UiState.Loading)
     val heroRecipeState: StateFlow<UiState<MealDetail>> = _heroRecipeState.asStateFlow()
