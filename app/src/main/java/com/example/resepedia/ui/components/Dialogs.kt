@@ -40,11 +40,6 @@ fun ThemeSelectionDialog(
         text = {
             Column {
                 ThemeOptionRow(
-                    label = stringResource(R.string.theme_system),
-                    selected = currentMode == AppThemeMode.SYSTEM,
-                    onClick = { onSelectMode(AppThemeMode.SYSTEM) }
-                )
-                ThemeOptionRow(
                     label = stringResource(R.string.theme_light),
                     selected = currentMode == AppThemeMode.LIGHT,
                     onClick = { onSelectMode(AppThemeMode.LIGHT) }

@@ -34,6 +34,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -53,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.resepedia.R
-import com.example.resepedia.model.MealDetail
 import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.UiState
 import com.example.resepedia.ui.components.ErrorView
@@ -76,6 +76,9 @@ fun DetailScreen(
     val detailState by viewModel.detailMealState.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
     val isFavorite = favoriteIds.contains(mealId)
+    val translatedMeal by viewModel.translatedMeal.collectAsState()
+    val isTranslating by viewModel.isTranslating.collectAsState()
+
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
@@ -102,8 +105,14 @@ fun DetailScreen(
         }
         is UiState.Success -> {
             val meal = state.data
-            val ingredients = meal.getIngredientsList()
-            val instructions = meal.getNumberedInstructions()
+
+            // Terapkan terjemahan jika tersedia dan ID resep cocok, selain itu pakai teks asli
+            val hasTranslation = translatedMeal != null && translatedMeal?.mealId == meal.idMeal
+            val displayTitle = if (hasTranslation) translatedMeal?.title.orEmpty() else meal.strMeal.orEmpty()
+            val displayCategory = if (hasTranslation) translatedMeal?.category.orEmpty() else meal.strCategory.orEmpty()
+            val displayArea = if (hasTranslation) translatedMeal?.area.orEmpty() else meal.strArea.orEmpty()
+            val ingredients = if (hasTranslation) translatedMeal?.ingredients ?: meal.getIngredientsList() else meal.getIngredientsList()
+            val instructions = if (hasTranslation) translatedMeal?.steps ?: meal.getNumberedInstructions() else meal.getNumberedInstructions()
 
             Column(
                 modifier = modifier
@@ -121,7 +130,7 @@ fun DetailScreen(
                         model = meal.strMealThumb,
                         contentDescription = stringResource(
                             R.string.recipe_image_desc,
-                            meal.strMeal.orEmpty()
+                            displayTitle
                         ),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
@@ -178,9 +187,22 @@ fun DetailScreen(
                         .fillMaxWidth()
                         .padding(18.dp)
                 ) {
-                    // Judul Resep
+                    // Indikator Loading Tipis saat proses terjemahan berjalan
+                    if (isTranslating) {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(2.dp)),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+
+                    // Judul Resep (Terjemahan / Asli)
                     Text(
-                        text = meal.strMeal.orEmpty(),
+                        text = displayTitle,
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Bold,
                             lineHeight = 32.sp
@@ -190,12 +212,12 @@ fun DetailScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Chip Kategori & Asal Negara
+                    // Chip Kategori & Asal Negara (Terjemahan / Asli)
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (!meal.strCategory.isNullOrBlank()) {
+                        if (displayCategory.isNotBlank()) {
                             Surface(
                                 shape = RoundedCornerShape(10.dp),
                                 color = MaterialTheme.colorScheme.primaryContainer
@@ -212,7 +234,7 @@ fun DetailScreen(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = meal.strCategory,
+                                        text = displayCategory,
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontWeight = FontWeight.SemiBold
                                         ),
@@ -222,7 +244,7 @@ fun DetailScreen(
                             }
                         }
 
-                        if (!meal.strArea.isNullOrBlank()) {
+                        if (displayArea.isNotBlank()) {
                             Surface(
                                 shape = RoundedCornerShape(10.dp),
                                 color = MaterialTheme.colorScheme.secondaryContainer
@@ -239,7 +261,7 @@ fun DetailScreen(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = meal.strArea,
+                                        text = displayArea,
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontWeight = FontWeight.SemiBold
                                         ),

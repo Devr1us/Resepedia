@@ -86,6 +86,7 @@ fun DashboardScreen(
     val searchResultsState by viewModel.searchResultsState.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
     val currentThemeMode by viewModel.themeMode.collectAsState()
+    val translations by viewModel.translations.collectAsState()
 
     var showThemeDialog by rememberSaveable { mutableStateOf(false) }
     var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
@@ -170,12 +171,15 @@ fun DashboardScreen(
                         }
                     }
 
-                    // Tombol Aksi: Bahasa & Tema
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Tombol Aksi: Bahasa & Tema (Jarak 16.dp, Tombol diperbesar menjadi 40.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         IconButton(
                             onClick = { showLanguageDialog = true },
                             modifier = Modifier
-                                .size(38.dp)
+                                .size(40.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.surfaceVariant)
                         ) {
@@ -187,12 +191,10 @@ fun DashboardScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(8.dp))
-
                         IconButton(
                             onClick = { showThemeDialog = true },
                             modifier = Modifier
-                                .size(38.dp)
+                                .size(40.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.surfaceVariant)
                         ) {
@@ -308,8 +310,11 @@ fun DashboardScreen(
                             items = meals,
                             key = { "search_${it.idMeal ?: it.hashCode()}" }
                         ) { meal ->
+                            val translatedMeal = meal.copy(
+                                strMeal = translations[meal.strMeal] ?: meal.strMeal
+                            )
                             RecipeCard(
-                                meal = meal,
+                                meal = translatedMeal,
                                 isFavorite = favoriteIds.contains(meal.idMeal.orEmpty()),
                                 onMealClick = onNavigateToDetail,
                                 onToggleFavorite = { viewModel.toggleFavorite(it) }
@@ -320,7 +325,7 @@ fun DashboardScreen(
                 null -> {}
             }
         } else {
-            // 3. Hero Card "Resep Hari Ini" (Span Penuh)
+            // 3. Hero Card "Resep Hari Ini" (Span Penuh dengan data terjemahan bila tersedia)
             item(span = { GridItemSpan(maxLineSpan) }, key = "hero_section") {
                 when (val hero = heroState) {
                     is UiState.Loading -> {
@@ -339,8 +344,14 @@ fun DashboardScreen(
                         ErrorView(onRetry = { viewModel.loadHeroRecipe() })
                     }
                     is UiState.Success -> {
+                        val heroMeal = hero.data
+                        val translatedHero = heroMeal.copy(
+                            strMeal = translations[heroMeal.strMeal] ?: heroMeal.strMeal,
+                            strCategory = translations[heroMeal.strCategory] ?: heroMeal.strCategory,
+                            strArea = translations[heroMeal.strArea] ?: heroMeal.strArea
+                        )
                         HeroRecipeCard(
-                            meal = hero.data,
+                            meal = translatedHero,
                             onMealClick = onNavigateToDetail,
                             onRefresh = { viewModel.loadHeroRecipe() }
                         )
@@ -383,10 +394,12 @@ fun DashboardScreen(
                                     items = catState.data,
                                     key = { it.idCategory ?: it.strCategory.orEmpty() }
                                 ) { category ->
+                                    val catName = category.strCategory.orEmpty()
                                     CategoryChip(
                                         category = category,
-                                        isSelected = category.strCategory.equals(selectedCategory, ignoreCase = true),
-                                        onCategoryClick = { viewModel.selectCategory(it) }
+                                        isSelected = catName.equals(selectedCategory, ignoreCase = true),
+                                        onCategoryClick = { viewModel.selectCategory(it) },
+                                        displayName = translations[catName]
                                     )
                                 }
                             }
@@ -397,8 +410,9 @@ fun DashboardScreen(
 
             // 5. Judul Daftar Resep Sesuai Kategori Terpilih (Span Penuh)
             item(span = { GridItemSpan(maxLineSpan) }, key = "category_recipes_title") {
+                val translatedCategoryName = translations[selectedCategory] ?: selectedCategory
                 Text(
-                    text = stringResource(R.string.recipes_by_category, selectedCategory),
+                    text = stringResource(R.string.recipes_by_category, translatedCategoryName),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(top = 6.dp)
@@ -418,16 +432,20 @@ fun DashboardScreen(
                     }
                 }
                 is UiState.Success -> {
+                    val translatedBadge = translations[selectedCategory] ?: selectedCategory
                     items(
                         items = mealsState.data,
                         key = { "meal_${it.idMeal ?: it.hashCode()}" }
                     ) { meal ->
+                        val translatedMeal = meal.copy(
+                            strMeal = translations[meal.strMeal] ?: meal.strMeal
+                        )
                         RecipeCard(
-                            meal = meal,
+                            meal = translatedMeal,
                             isFavorite = favoriteIds.contains(meal.idMeal.orEmpty()),
                             onMealClick = onNavigateToDetail,
                             onToggleFavorite = { viewModel.toggleFavorite(it) },
-                            categoryBadge = selectedCategory
+                            categoryBadge = translatedBadge
                         )
                     }
                 }

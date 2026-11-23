@@ -26,7 +26,6 @@
     <string name="btn_change_language">Change Language</string>
     <string name="btn_change_theme">Change Theme</string>
     <string name="theme_dialog_title">Choose Theme</string>
-    <string name="theme_system">Follow System</string>
     <string name="theme_light">Light Mode</string>
     <string name="theme_dark">Dark Mode</string>
     <string name="lang_dialog_title">Choose Language</string>

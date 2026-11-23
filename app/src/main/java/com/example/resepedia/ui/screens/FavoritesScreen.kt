@@ -43,6 +43,7 @@ fun FavoritesScreen(
 
     val favoritesState by viewModel.favoritesState.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
+    val translations by viewModel.translations.collectAsState()
 
     Column(
         modifier = modifier
@@ -94,8 +95,11 @@ fun FavoritesScreen(
                             items = meals,
                             key = { "fav_${it.idMeal ?: it.hashCode()}" }
                         ) { meal ->
+                            val translatedMeal = meal.copy(
+                                strMeal = translations[meal.strMeal] ?: meal.strMeal
+                            )
                             RecipeCard(
-                                meal = meal,
+                                meal = translatedMeal,
                                 isFavorite = true,
                                 onMealClick = onNavigateToDetail,
                                 onToggleFavorite = { viewModel.toggleFavorite(it) }

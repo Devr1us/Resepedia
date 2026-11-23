@@ -5,7 +5,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.os.LocaleListCompat
@@ -39,11 +38,9 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             val themeMode by viewModel.themeMode.collectAsState()
-            val systemInDark = isSystemInDarkTheme()
 
-            // Menentukan tema berdasarkan preferensi
+            // Menentukan tema berdasarkan preferensi (hanya Terang dan Gelap)
             val isDarkTheme = when (themeMode) {
-                AppThemeMode.SYSTEM -> systemInDark
                 AppThemeMode.LIGHT -> false
                 AppThemeMode.DARK -> true
             }

@@ -26,7 +26,6 @@
     <string name="btn_change_language">Ganti Bahasa</string>
     <string name="btn_change_theme">Ganti Tema</string>
     <string name="theme_dialog_title">Pilih Tema</string>
-    <string name="theme_system">Ikuti Sistem</string>
     <string name="theme_light">Mode Terang</string>
     <string name="theme_dark">Mode Gelap</string>
     <string name="lang_dialog_title">Pilih Bahasa</string>

@@ -37,9 +37,11 @@ fun CategoryChip(
     category: CategoryItem,
     isSelected: Boolean,
     onCategoryClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    displayName: String? = null
 ) {
     val categoryName = category.strCategory.orEmpty()
+    val textToShow = displayName ?: categoryName
 
     val backgroundColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
@@ -76,7 +78,7 @@ fun CategoryChip(
         ) {
             AsyncImage(
                 model = category.strCategoryThumb,
-                contentDescription = stringResource(R.string.category_image_desc, categoryName),
+                contentDescription = stringResource(R.string.category_image_desc, textToShow),
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .size(46.dp)
@@ -86,9 +88,9 @@ fun CategoryChip(
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        // Nama Kategori
+        // Nama Kategori (Menampilkan terjemahan jika ada, atau nama asli)
         Text(
-            text = categoryName,
+            text = textToShow,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontSize = 11.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium

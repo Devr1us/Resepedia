@@ -65,6 +65,9 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
+    // ML Kit On-Device Translation
+    implementation(libs.mlkit.translate)
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

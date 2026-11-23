@@ -2,12 +2,12 @@ package com.example.resepedia.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 enum class AppThemeMode {
-    SYSTEM,
     LIGHT,
     DARK
 }
@@ -16,19 +16,35 @@ class PreferencesManager(context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("resepedia_prefs", Context.MODE_PRIVATE)
 
-    private val _themeMode = MutableStateFlow(loadThemeMode())
+    private val _themeMode = MutableStateFlow(loadThemeMode(context))
     val themeMode: StateFlow<AppThemeMode> = _themeMode.asStateFlow()
 
     private val _favoriteIds = MutableStateFlow(loadFavoriteIds())
     val favoriteIds: StateFlow<Set<String>> = _favoriteIds.asStateFlow()
 
-    private fun loadThemeMode(): AppThemeMode {
-        val modeStr = prefs.getString(KEY_THEME_MODE, AppThemeMode.SYSTEM.name)
-        return try {
-            AppThemeMode.valueOf(modeStr ?: AppThemeMode.SYSTEM.name)
-        } catch (e: Exception) {
-            AppThemeMode.SYSTEM
+    /**
+     * Memuat tema tersimpan. Jika tersimpan "SYSTEM", belum ada, atau tidak valid,
+     * migrasikan ke DARK bila mode malam sistem aktif, selain itu LIGHT.
+     */
+    private fun loadThemeMode(context: Context): AppThemeMode {
+        val modeStr = prefs.getString(KEY_THEME_MODE, null)
+        if (modeStr != null) {
+            try {
+                if (!modeStr.equals("SYSTEM", ignoreCase = true)) {
+                    return AppThemeMode.valueOf(modeStr)
+                }
+            } catch (e: Exception) {
+                // Abaikan bila string tersimpan tidak cocok dengan enum
+            }
         }
+
+        // Tentukan default berdasarkan konfigurasi tema sistem saat ini
+        val isSystemNight = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        val defaultMode = if (isSystemNight) AppThemeMode.DARK else AppThemeMode.LIGHT
+
+        // Simpan default terpilih agar persisten untuk sesi berikutnya
+        prefs.edit().putString(KEY_THEME_MODE, defaultMode.name).apply()
+        return defaultMode
     }
 
     fun setThemeMode(mode: AppThemeMode) {
