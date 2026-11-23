@@ -69,6 +69,7 @@ import com.example.resepedia.ui.components.rememberShimmerBrush
 import com.example.resepedia.ui.theme.PrimaryOrange
 import com.example.resepedia.ui.theme.staggeredEntrance
 import com.example.resepedia.ui.util.ShakeEffect
+import com.example.resepedia.ui.util.responsiveGridCells
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -103,7 +104,7 @@ fun DashboardScreen(
     val isSurpriseLoading by viewModel.isSurpriseLoading.collectAsState()
     val isShakeEnabled by viewModel.isShakeEnabled.collectAsState()
     val haptic = LocalHapticFeedback.current
-    var isShakeTriggered by remember { mutableStateOf(false) }
+    var isShakeTriggered by rememberSaveable { mutableStateOf(false) }
 
     fun triggerSurpriseMe() {
         viewModel.fetchRandomMeal(
@@ -157,16 +158,14 @@ fun DashboardScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Single LazyVerticalGrid utama (kolom tetap 2 di portrait maupun landscape)
+        // Single LazyVerticalGrid utama (kolom adaptif responsif di portrait & landscape/tablet)
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = responsiveGridCells(minSize = 160.dp),
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            val maxLineSpan = 2
-
             // 1. Header (Span Penuh): Logo, Nama Aplikasi, Tombol Bahasa & Tema
             item(span = { GridItemSpan(maxLineSpan) }, key = "header_section") {
                 Column(modifier = Modifier.fillMaxWidth()) {

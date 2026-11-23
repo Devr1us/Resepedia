@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import com.example.resepedia.R
 import com.example.resepedia.ui.theme.Motion
 import com.example.resepedia.ui.theme.PrimaryOrange
+import com.example.resepedia.ui.util.rememberWindowInfo
 import kotlinx.coroutines.delay
 
 /**
@@ -69,6 +70,9 @@ fun SurpriseMeCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val windowInfo = rememberWindowInfo()
+    val isCompact = windowInfo.isCompactHeight
+
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
@@ -140,7 +144,7 @@ fun SurpriseMeCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 14.dp),
+                .padding(horizontal = 18.dp, vertical = if (isCompact) 8.dp else 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -153,7 +157,7 @@ fun SurpriseMeCard(
                     shape = CircleShape,
                     color = PrimaryOrange,
                     shadowElevation = 3.dp,
-                    modifier = Modifier.size(46.dp)
+                    modifier = Modifier.size(if (isCompact) 36.dp else 46.dp)
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
@@ -168,12 +172,12 @@ fun SurpriseMeCard(
                             imageVector = Icons.Filled.Casino,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(26.dp)
+                            modifier = Modifier.size(if (isCompact) 20.dp else 26.dp)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(if (isCompact) 10.dp else 14.dp))
 
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {

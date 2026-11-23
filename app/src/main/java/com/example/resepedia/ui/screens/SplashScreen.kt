@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.resepedia.R
 import com.example.resepedia.ui.components.AppLogo
+import com.example.resepedia.ui.util.rememberWindowInfo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -42,6 +45,9 @@ fun SplashScreen(
     onSplashFinished: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val windowInfo = rememberWindowInfo()
+    val isCompact = windowInfo.isCompactHeight
+
     val logoScale = remember { Animatable(0.6f) }
     val logoAlpha = remember { Animatable(0f) }
     val textAlpha = remember { Animatable(0f) }
@@ -108,7 +114,8 @@ fun SplashScreen(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
             // Logo Resepedia Utama
             Box(
@@ -118,10 +125,10 @@ fun SplashScreen(
                     alpha = logoAlpha.value
                 }
             ) {
-                AppLogo(size = 96.dp)
+                AppLogo(size = if (isCompact) 64.dp else 96.dp)
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(if (isCompact) 10.dp else 20.dp))
 
             // Teks Nama Aplikasi & Tagline
             Column(
@@ -133,14 +140,14 @@ fun SplashScreen(
             ) {
                 Text(
                     text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineMedium.copy(
+                    style = (if (isCompact) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineMedium).copy(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.sp
                     ),
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(if (isCompact) 4.dp else 6.dp))
 
                 Text(
                     text = stringResource(R.string.tagline),

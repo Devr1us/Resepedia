@@ -52,6 +52,7 @@ import com.example.resepedia.ui.components.rememberShimmerBrush
 import com.example.resepedia.ui.theme.staggeredEntrance
 import com.example.resepedia.ui.util.areaDisplayName
 import com.example.resepedia.ui.util.getAreaFlag
+import com.example.resepedia.ui.util.responsiveGridCells
 
 /**
  * Layar Jelajah Negara (Area).
@@ -95,7 +96,7 @@ fun AreaScreen(
     }
 
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = responsiveGridCells(minSize = 160.dp),
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
@@ -103,8 +104,6 @@ fun AreaScreen(
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        val maxLineSpan = 2
-
         if (selectedArea == null) {
             // ==========================================
             // MODE A: DAFTAR NEGARA / AREA

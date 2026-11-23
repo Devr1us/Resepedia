@@ -471,7 +471,13 @@ class MainViewModel(
         }
     }
 
-    fun loadMealDetail(mealId: String) {
+    fun loadMealDetail(mealId: String, forceRefresh: Boolean = false) {
+        val current = (_detailMealState.value as? UiState.Success)?.data
+        if (!forceRefresh && current != null && current.idMeal == mealId) {
+            // Data resep sudah tersedia di cache memori, tidak perlu fetch ulang saat rotasi layar
+            return
+        }
+
         translateDetailJob?.cancel()
         _translatedMeal.value = null
         _isTranslating.value = false
@@ -520,7 +526,14 @@ class MainViewModel(
         loadFavoriteMeals()
     }
 
-    fun loadFavoriteMeals() {
+    fun loadFavoriteMeals(forceRefresh: Boolean = false) {
+        val currentIds = preferencesManager.favoriteIds.value
+        val currentSuccess = (_favoritesState.value as? UiState.Success)?.data
+        if (!forceRefresh && currentSuccess != null && currentSuccess.mapNotNull { it.idMeal }.toSet() == currentIds) {
+            // Data favorit sudah cocok dan tersimpan di memori, hindari loading flicker saat rotasi
+            return
+        }
+
         viewModelScope.launch {
             _favoritesState.value = UiState.Loading
             try {
@@ -574,7 +587,11 @@ class MainViewModel(
     /**
      * Memuat daftar resep berdasarkan negara terpilih.
      */
-    fun loadMealsByArea(area: String) {
+    fun loadMealsByArea(area: String, forceRefresh: Boolean = false) {
+        if (!forceRefresh && _selectedArea.value == area && _mealsByAreaState.value is UiState.Success) {
+            // Data negara terpilih sudah ada di memori, tidak perlu fetch ulang saat rotasi layar
+            return
+        }
         viewModelScope.launch {
             _mealsByAreaState.value = UiState.Loading
             try {

@@ -62,6 +62,7 @@ import com.example.resepedia.ui.theme.GradientBlackBottom
 import com.example.resepedia.ui.theme.GradientBlackTop
 import com.example.resepedia.ui.theme.Motion
 import com.example.resepedia.ui.theme.PrimaryOrange
+import com.example.resepedia.ui.util.rememberWindowInfo
 
 @Composable
 fun HeroRecipeCard(
@@ -70,6 +71,10 @@ fun HeroRecipeCard(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val windowInfo = rememberWindowInfo()
+    val isCompact = windowInfo.isCompactHeight
+    val cardHeight = if (isCompact) 175.dp else 240.dp
+
     var rotationAngle by remember { mutableFloatStateOf(0f) }
     val animatedRotation by animateFloatAsState(
         targetValue = rotationAngle,
@@ -88,7 +93,7 @@ fun HeroRecipeCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(240.dp)
+            .height(cardHeight)
             .graphicsLayer {
                 scaleX = cardScale
                 scaleY = cardScale
@@ -144,19 +149,19 @@ fun HeroRecipeCard(
                 Surface(
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .padding(14.dp),
+                        .padding(if (isCompact) 10.dp else 14.dp),
                     shape = RoundedCornerShape(20.dp),
                     color = PrimaryOrange
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = if (isCompact) 4.dp else 6.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.AutoAwesome,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(if (isCompact) 12.dp else 14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
@@ -177,8 +182,8 @@ fun HeroRecipeCard(
                     },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(14.dp)
-                        .size(36.dp)
+                        .padding(if (isCompact) 10.dp else 14.dp)
+                        .size(if (isCompact) 32.dp else 36.dp)
                         .background(
                             color = Color.Black.copy(alpha = 0.5f),
                             shape = CircleShape
@@ -189,7 +194,7 @@ fun HeroRecipeCard(
                         contentDescription = stringResource(R.string.hero_refresh_desc),
                         tint = Color.White,
                         modifier = Modifier
-                            .size(20.dp)
+                            .size(if (isCompact) 18.dp else 20.dp)
                             .rotate(animatedRotation)
                     )
                 }
@@ -199,12 +204,12 @@ fun HeroRecipeCard(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(if (isCompact) 10.dp else 16.dp)
                 ) {
                     // Judul Resep Hari Ini
                     Text(
                         text = currentMeal.strMeal.orEmpty(),
-                        style = MaterialTheme.typography.titleLarge.copy(
+                        style = (if (isCompact) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge).copy(
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         ),
@@ -212,7 +217,7 @@ fun HeroRecipeCard(
                         overflow = TextOverflow.Ellipsis
                     )
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(if (isCompact) 3.dp else 6.dp))
 
                     // Baris Chip Kategori & Asal Negara
                     Row(
@@ -226,7 +231,7 @@ fun HeroRecipeCard(
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = if (isCompact) 2.dp else 4.dp)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Restaurant,
@@ -250,7 +255,7 @@ fun HeroRecipeCard(
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = if (isCompact) 2.dp else 4.dp)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Public,
@@ -268,7 +273,7 @@ fun HeroRecipeCard(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(if (isCompact) 6.dp else 10.dp))
 
                     // Tombol "Lihat Resep"
                     Button(
@@ -278,7 +283,7 @@ fun HeroRecipeCard(
                             contentColor = Color.White
                         ),
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.height(38.dp)
+                        modifier = Modifier.height(if (isCompact) 32.dp else 38.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.hero_view_recipe),

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,6 +40,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.resepedia.R
+import com.example.resepedia.ui.util.rememberWindowInfo
 
 /**
  * Menghasilkan Brush gradien shimmer bergerak menggunakan infinite transition tunggal.
@@ -99,11 +101,15 @@ fun HeroSkeleton(
     modifier: Modifier = Modifier,
     brush: Brush = rememberShimmerBrush()
 ) {
+    val windowInfo = rememberWindowInfo()
+    val isCompact = windowInfo.isCompactHeight
+    val skeletonHeight = if (isCompact) 175.dp else 240.dp
+
     val loadingDesc = stringResource(R.string.loading_desc)
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(240.dp)
+            .height(skeletonHeight)
             .semantics { contentDescription = loadingDesc },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -117,7 +123,7 @@ fun HeroSkeleton(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(18.dp),
+                    .padding(if (isCompact) 12.dp else 18.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 // Badge placeholder (Resep Hari Ini)
@@ -265,115 +271,212 @@ fun DetailSkeleton(
     modifier: Modifier = Modifier,
     brush: Brush = rememberShimmerBrush()
 ) {
+    val windowInfo = rememberWindowInfo()
+    val isLandscape = windowInfo.isLandscape
     val loadingDesc = stringResource(R.string.loading_desc)
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .semantics { contentDescription = loadingDesc }
-    ) {
-        // 1. Gambar Utama (Header aspect ratio 1.25f)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1.25f)
-                .shimmer(brush)
-        )
 
-        // 2. Konten Rincian
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp)
+    if (isLandscape) {
+        Row(
+            modifier = modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .semantics { contentDescription = loadingDesc }
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Placeholder Judul resep
-            Box(
+            // Kolom Kiri Skeleton
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(0.85f)
-                    .height(26.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .shimmer(brush)
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Placeholder Chip Kategori & Asal Negara
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) {
                 Box(
-                    modifier = Modifier
-                        .size(width = 85.dp, height = 30.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .shimmer(brush)
-                )
-                Box(
-                    modifier = Modifier
-                        .size(width = 85.dp, height = 30.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .shimmer(brush)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Placeholder Judul Bagian Bahan
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.4f)
-                    .height(20.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .shimmer(brush)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Placeholder Item Bahan (3 baris)
-            repeat(3) {
-                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                        .height(180.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .shimmer(brush)
+                )
+                Spacer(modifier = Modifier.height(14.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.85f)
+                        .height(24.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .shimmer(brush)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .height(16.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .size(width = 80.dp, height = 28.dp)
+                            .clip(RoundedCornerShape(8.dp))
                             .shimmer(brush)
                     )
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.3f)
-                            .height(16.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .size(width = 80.dp, height = 28.dp)
+                            .clip(RoundedCornerShape(8.dp))
                             .shimmer(brush)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Placeholder Judul Langkah Memasak
+            // Kolom Kanan Skeleton
+            Column(
+                modifier = Modifier
+                    .weight(1.2f)
+                    .fillMaxHeight()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.4f)
+                        .height(20.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .shimmer(brush)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                repeat(3) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(36.dp)
+                            .padding(vertical = 4.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .shimmer(brush)
+                    )
+                }
+                Spacer(modifier = Modifier.height(18.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .height(20.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .shimmer(brush)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                repeat(2) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                            .padding(vertical = 4.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .shimmer(brush)
+                    )
+                }
+            }
+        }
+    } else {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .semantics { contentDescription = loadingDesc }
+        ) {
+            // 1. Gambar Utama (Header aspect ratio 1.25f)
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.5f)
-                    .height(20.dp)
-                    .clip(RoundedCornerShape(6.dp))
+                    .fillMaxWidth()
+                    .aspectRatio(1.25f)
                     .shimmer(brush)
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Placeholder Kartu Langkah Memasak (2 kartu)
-            repeat(2) {
+            // 2. Konten Rincian
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(18.dp)
+            ) {
+                // Placeholder Judul resep
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .padding(vertical = 4.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .fillMaxWidth(0.85f)
+                        .height(26.dp)
+                        .clip(RoundedCornerShape(6.dp))
                         .shimmer(brush)
                 )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // Placeholder Chip Kategori & Asal Negara
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .size(width = 85.dp, height = 30.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .shimmer(brush)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(width = 85.dp, height = 30.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .shimmer(brush)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Placeholder Judul Bagian Bahan
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.4f)
+                        .height(20.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .shimmer(brush)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Placeholder Item Bahan (3 baris)
+                repeat(3) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.5f)
+                                .height(16.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .shimmer(brush)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.3f)
+                                .height(16.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .shimmer(brush)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Placeholder Judul Langkah Memasak
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .height(20.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .shimmer(brush)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Placeholder Kartu Langkah Memasak (2 kartu)
+                repeat(2) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp)
+                            .padding(vertical = 4.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .shimmer(brush)
+                    )
+                }
             }
         }
     }

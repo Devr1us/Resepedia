@@ -36,6 +36,7 @@ import com.example.resepedia.ui.components.RecipeCard
 import com.example.resepedia.ui.components.RecipeCardSkeleton
 import com.example.resepedia.ui.theme.Motion
 import com.example.resepedia.ui.theme.staggeredEntrance
+import com.example.resepedia.ui.util.responsiveGridCells
 
 @Composable
 fun FavoritesScreen(
@@ -61,9 +62,9 @@ fun FavoritesScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Single LazyVerticalGrid utama dengan 2 Kolom Tetap
+        // Single LazyVerticalGrid utama dengan kolom responsif
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = responsiveGridCells(minSize = 160.dp),
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),

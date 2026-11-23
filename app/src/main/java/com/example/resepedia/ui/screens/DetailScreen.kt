@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.resepedia.R
+import com.example.resepedia.model.Ingredient
 import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.UiState
 import com.example.resepedia.ui.components.DetailSkeleton
@@ -73,6 +75,7 @@ import com.example.resepedia.ui.theme.HeartRed
 import com.example.resepedia.ui.theme.Motion
 import com.example.resepedia.ui.theme.PrimaryOrange
 import com.example.resepedia.ui.theme.staggeredEntrance
+import com.example.resepedia.ui.util.rememberWindowInfo
 
 @Composable
 fun DetailScreen(
@@ -104,6 +107,9 @@ fun DetailScreen(
     val translatedMeal by viewModel.translatedMeal.collectAsState()
     val isTranslating by viewModel.isTranslating.collectAsState()
 
+    val windowInfo = rememberWindowInfo()
+    val isLandscape = windowInfo.isLandscape
+
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
@@ -132,390 +138,617 @@ fun DetailScreen(
             val ingredients = if (hasTranslation) translatedMeal?.ingredients ?: meal.getIngredientsList() else meal.getIngredientsList()
             val instructions = if (hasTranslation) translatedMeal?.steps ?: meal.getNumberedInstructions() else meal.getNumberedInstructions()
 
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .verticalScroll(scrollState)
-            ) {
-                // Header Gambar Penuh dengan Tombol Kembali & Favorit
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1.25f)
+            if (isLandscape) {
+                // ==========================================
+                // TAMPILAN LANDSCAPE (2 KOLOM RESPONSIP)
+                // ==========================================
+                Row(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
-                    AsyncImage(
-                        model = meal.strMealThumb,
-                        contentDescription = stringResource(
-                            R.string.recipe_image_desc,
-                            displayTitle
-                        ),
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-
-                    // Tombol Kembali (Kiri Atas)
-                    IconButton(
-                        onClick = onNavigateBack,
+                    // Kolom Kiri: Gambar, Tombol Navigasi, Judul, Kategori & Tombol Aksi
+                    Column(
                         modifier = Modifier
-                            .align(Alignment.TopStart)
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState())
                             .padding(16.dp)
-                            .size(42.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
-                                shape = CircleShape
-                            )
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.btn_back),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    // Tombol Favorit (Kanan Atas)
-                    IconButton(
-                        onClick = { viewModel.toggleFavorite(mealId) },
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(16.dp)
-                            .size(42.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
-                                shape = CircleShape
-                            )
-                    ) {
-                        val heartColor by animateColorAsState(
-                            targetValue = if (isFavorite) HeartRed else MaterialTheme.colorScheme.onSurfaceVariant,
-                            label = "heartColor"
-                        )
-                        Icon(
-                            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = stringResource(
-                                if (isFavorite) R.string.btn_favorite_remove else R.string.btn_favorite_add
-                            ),
-                            tint = heartColor
-                        )
-                    }
-                }
-
-                // Konten Rincian Resep
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(18.dp)
-                ) {
-                    // Indikator Loading Tipis saat proses terjemahan berjalan
-                    if (isTranslating) {
-                        LinearProgressIndicator(
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(3.dp)
-                                .clip(RoundedCornerShape(2.dp)),
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                    }
-
-                    // Judul Resep (Terjemahan / Asli)
-                    Text(
-                        text = displayTitle,
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            lineHeight = 32.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Chip Kategori & Asal Negara (Terjemahan / Asli)
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (displayCategory.isNotBlank()) {
-                            Surface(
-                                shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Restaurant,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = displayCategory,
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            fontWeight = FontWeight.SemiBold
-                                        ),
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                }
-                            }
-                        }
-
-                        if (displayArea.isNotBlank()) {
-                            Surface(
-                                shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Public,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = displayArea,
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            fontWeight = FontWeight.SemiBold
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    // Tombol Tonton di YouTube (Jika Tersedia)
-                    AnimatedVisibility(
-                        visible = !meal.strYoutube.isNullOrBlank(),
-                        enter = fadeIn(Motion.mediumTween()),
-                        exit = fadeOut(Motion.shortTween())
-                    ) {
-                        Column {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(meal.strYoutube))
-                                    context.startActivity(intent)
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFFE53935),
-                                    contentColor = Color.White
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                        ) {
+                            AsyncImage(
+                                model = meal.strMealThumb,
+                                contentDescription = stringResource(
+                                    R.string.recipe_image_desc,
+                                    displayTitle
                                 ),
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.fillMaxWidth()
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+
+                            // Tombol Kembali
+                            IconButton(
+                                onClick = onNavigateBack,
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .padding(12.dp)
+                                    .size(38.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
+                                        shape = CircleShape
+                                    )
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.PlayCircle,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp)
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.btn_back),
+                                    tint = MaterialTheme.colorScheme.onSurface
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = stringResource(R.string.detail_watch_youtube),
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                            }
+
+                            // Tombol Favorit
+                            IconButton(
+                                onClick = { viewModel.toggleFavorite(mealId) },
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(12.dp)
+                                    .size(38.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
+                                        shape = CircleShape
+                                    )
+                            ) {
+                                val heartColor by animateColorAsState(
+                                    targetValue = if (isFavorite) HeartRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    label = "heartColor"
+                                )
+                                Icon(
+                                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                                    contentDescription = stringResource(
+                                        if (isFavorite) R.string.btn_favorite_remove else R.string.btn_favorite_add
+                                    ),
+                                    tint = heartColor
                                 )
                             }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
-                    // Bagian Bahan-Bahan
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                        // Judul Resep
                         Text(
-                            text = stringResource(R.string.detail_ingredients_title),
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            text = displayTitle,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                lineHeight = 28.sp
+                            ),
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "(${ingredients.size})",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                    // Banner Kecocokan Bahan dari Hasil Pencarian
-                    AnimatedVisibility(
-                        visible = matchedKeywords.isNotEmpty(),
-                        enter = fadeIn(Motion.mediumTween()) + expandVertically(Motion.mediumTween()),
-                        exit = fadeOut(Motion.shortTween()) + shrinkVertically(Motion.shortTween())
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp)
+                        // Chip Kategori & Asal Negara
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Check,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Text(
-                                    text = stringResource(
-                                        R.string.detail_match_banner,
-                                        matchedKeywords.joinToString(", ")
-                                    ),
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
-                    }
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ingredients.forEachIndexed { index, item ->
-                            val isMatched = matchedKeywords.any { keyword ->
-                                item.name.contains(keyword, ignoreCase = true) ||
-                                        keyword.contains(item.name, ignoreCase = true)
-                            }
-
-                            val cardContainerColor = if (isMatched) {
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-                            } else {
-                                MaterialTheme.colorScheme.surface
-                            }
-
-                            val checkmarkScale by animateFloatAsState(
-                                targetValue = if (isMatched) 1.15f else 1f,
-                                animationSpec = Motion.mediumTween(),
-                                label = "checkmarkScale"
-                            )
-
-                            Card(
-                                shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = cardContainerColor
-                                ),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .staggeredEntrance(index = index),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                            if (displayCategory.isNotBlank()) {
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer
                                 ) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.weight(1f)
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     ) {
                                         Icon(
-                                            imageVector = if (isMatched) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
+                                            imageVector = Icons.Outlined.Restaurant,
                                             contentDescription = null,
-                                            tint = if (isMatched) MaterialTheme.colorScheme.primary else AccentGreen,
-                                            modifier = Modifier
-                                                .size(16.dp)
-                                                .graphicsLayer {
-                                                    scaleX = checkmarkScale
-                                                    scaleY = checkmarkScale
-                                                }
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            modifier = Modifier.size(12.dp)
                                         )
-                                        Spacer(modifier = Modifier.width(10.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = item.name,
-                                            style = MaterialTheme.typography.bodyMedium.copy(
-                                                fontWeight = if (isMatched) FontWeight.Bold else FontWeight.Medium
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            text = displayCategory,
+                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
                                         )
                                     }
+                                }
+                            }
 
-                                    if (item.measure.isNotBlank()) {
+                            if (displayArea.isNotBlank()) {
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = MaterialTheme.colorScheme.secondaryContainer
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Public,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = item.measure,
-                                            style = MaterialTheme.typography.bodySmall.copy(
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            color = MaterialTheme.colorScheme.primary
+                                            text = displayArea,
+                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer
                                         )
                                     }
                                 }
                             }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Bagian Langkah Memasak
-                    Text(
-                        text = stringResource(R.string.detail_instructions_title),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        instructions.forEachIndexed { index, step ->
-                            Card(
-                                shape = RoundedCornerShape(14.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surface
-                                ),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .staggeredEntrance(index = index),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-                            ) {
-                                Row(
+                        // Tombol Tonton di YouTube
+                        AnimatedVisibility(
+                            visible = !meal.strYoutube.isNullOrBlank(),
+                            enter = fadeIn(Motion.mediumTween()),
+                            exit = fadeOut(Motion.shortTween())
+                        ) {
+                            Column {
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Button(
+                                    onClick = {
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(meal.strYoutube))
+                                        context.startActivity(intent)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFFE53935),
+                                        contentColor = Color.White
+                                    ),
+                                    shape = RoundedCornerShape(12.dp),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(14.dp),
-                                    verticalAlignment = Alignment.Top
+                                        .height(40.dp)
                                 ) {
-                                    Surface(
-                                        shape = CircleShape,
-                                        color = PrimaryOrange,
-                                        modifier = Modifier.size(28.dp)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Text(
-                                                text = "${index + 1}",
-                                                style = MaterialTheme.typography.labelSmall.copy(
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color.White
-                                                )
-                                            )
-                                        }
-                                    }
-
-                                    Spacer(modifier = Modifier.width(12.dp))
-
+                                    Icon(
+                                        imageVector = Icons.Filled.PlayCircle,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = step,
-                                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.weight(1f)
+                                        text = stringResource(R.string.detail_watch_youtube),
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                                     )
                                 }
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(28.dp))
+                    // Kolom Kanan: Bahan-Bahan & Langkah Memasak (Scrollable)
+                    Column(
+                        modifier = Modifier
+                            .weight(1.2f)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp)
+                    ) {
+                        if (isTranslating) {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(3.dp)
+                                    .clip(RoundedCornerShape(2.dp)),
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
+
+                        IngredientsSection(ingredients = ingredients, matchedKeywords = matchedKeywords)
+                        Spacer(modifier = Modifier.height(20.dp))
+                        InstructionsSection(instructions = instructions)
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+                }
+            } else {
+                // ==========================================
+                // TAMPILAN PORTRAIT (KOLOM VERTIKAL TUNGGAL)
+                // ==========================================
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .verticalScroll(scrollState)
+                ) {
+                    // Header Gambar Penuh dengan Tombol Kembali & Favorit
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1.25f)
+                    ) {
+                        AsyncImage(
+                            model = meal.strMealThumb,
+                            contentDescription = stringResource(
+                                R.string.recipe_image_desc,
+                                displayTitle
+                            ),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+
+                        // Tombol Kembali (Kiri Atas)
+                        IconButton(
+                            onClick = onNavigateBack,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(16.dp)
+                                .size(42.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
+                                    shape = CircleShape
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.btn_back),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        // Tombol Favorit (Kanan Atas)
+                        IconButton(
+                            onClick = { viewModel.toggleFavorite(mealId) },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(16.dp)
+                                .size(42.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
+                                    shape = CircleShape
+                                )
+                        ) {
+                            val heartColor by animateColorAsState(
+                                targetValue = if (isFavorite) HeartRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                                label = "heartColor"
+                            )
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                                contentDescription = stringResource(
+                                    if (isFavorite) R.string.btn_favorite_remove else R.string.btn_favorite_add
+                                ),
+                                tint = heartColor
+                            )
+                        }
+                    }
+
+                    // Konten Rincian Resep
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(18.dp)
+                    ) {
+                        if (isTranslating) {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(3.dp)
+                                    .clip(RoundedCornerShape(2.dp)),
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
+
+                        Text(
+                            text = displayTitle,
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                lineHeight = 32.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (displayCategory.isNotBlank()) {
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Restaurant,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = displayCategory,
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                fontWeight = FontWeight.SemiBold
+                                            ),
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (displayArea.isNotBlank()) {
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = MaterialTheme.colorScheme.secondaryContainer
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Public,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = displayArea,
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                fontWeight = FontWeight.SemiBold
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        AnimatedVisibility(
+                            visible = !meal.strYoutube.isNullOrBlank(),
+                            enter = fadeIn(Motion.mediumTween()),
+                            exit = fadeOut(Motion.shortTween())
+                        ) {
+                            Column {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Button(
+                                    onClick = {
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(meal.strYoutube))
+                                        context.startActivity(intent)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFFE53935),
+                                        contentColor = Color.White
+                                    ),
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.PlayCircle,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.detail_watch_youtube),
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        IngredientsSection(ingredients = ingredients, matchedKeywords = matchedKeywords)
+                        Spacer(modifier = Modifier.height(24.dp))
+                        InstructionsSection(instructions = instructions)
+                        Spacer(modifier = Modifier.height(28.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun IngredientsSection(
+    ingredients: List<Ingredient>,
+    matchedKeywords: List<String>,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(R.string.detail_ingredients_title),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "(${ingredients.size})",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        AnimatedVisibility(
+            visible = matchedKeywords.isNotEmpty(),
+            enter = fadeIn(Motion.mediumTween()) + expandVertically(Motion.mediumTween()),
+            exit = fadeOut(Motion.shortTween()) + shrinkVertically(Motion.shortTween())
+        ) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = stringResource(
+                            R.string.detail_match_banner,
+                            matchedKeywords.joinToString(", ")
+                        ),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            ingredients.forEachIndexed { index, item ->
+                val isMatched = matchedKeywords.any { keyword ->
+                    item.name.contains(keyword, ignoreCase = true) ||
+                            keyword.contains(item.name, ignoreCase = true)
+                }
+
+                val cardContainerColor = if (isMatched) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                } else {
+                    MaterialTheme.colorScheme.surface
+                }
+
+                val checkmarkScale by animateFloatAsState(
+                    targetValue = if (isMatched) 1.15f else 1f,
+                    animationSpec = Motion.mediumTween(),
+                    label = "checkmarkScale"
+                )
+
+                Card(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = cardContainerColor
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .staggeredEntrance(index = index),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                imageVector = if (isMatched) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
+                                contentDescription = null,
+                                tint = if (isMatched) MaterialTheme.colorScheme.primary else AccentGreen,
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .graphicsLayer {
+                                        scaleX = checkmarkScale
+                                        scaleY = checkmarkScale
+                                    }
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = item.name,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = if (isMatched) FontWeight.Bold else FontWeight.Medium
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        if (item.measure.isNotBlank()) {
+                            Text(
+                                text = item.measure,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InstructionsSection(
+    instructions: List<String>,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.detail_instructions_title),
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            instructions.forEachIndexed { index, step ->
+                Card(
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .staggeredEntrance(index = index),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = PrimaryOrange,
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = "${index + 1}",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Text(
+                            text = step,
+                            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }

@@ -63,6 +63,7 @@ import androidx.core.os.LocaleListCompat
 import com.example.resepedia.R
 import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.theme.Motion
+import com.example.resepedia.ui.util.rememberWindowInfo
 import kotlinx.coroutines.launch
 
 /**
@@ -77,6 +78,9 @@ fun OnboardingScreen(
     onFinishOnboarding: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val windowInfo = rememberWindowInfo()
+    val isLandscape = windowInfo.isLandscape
+
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { 3 })
 
@@ -171,54 +175,52 @@ fun OnboardingScreen(
         }
 
         // Bar Bawah: Indikator Titik & Tombol Aksi (Lanjut / Mulai)
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Indikator Titik Halaman
-            val indicatorDesc = stringResource(
-                R.string.onboarding_page_indicator_desc,
-                pagerState.currentPage + 1,
-                3
-            )
+        val indicatorDesc = stringResource(
+            R.string.onboarding_page_indicator_desc,
+            pagerState.currentPage + 1,
+            3
+        )
+
+        if (isLandscape) {
+            // Tampilan Landscape: Bar Bawah satu baris horizontal (hemat ruang vertikal)
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .padding(bottom = 20.dp)
-                    .semantics { contentDescription = indicatorDesc }
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                repeat(3) { index ->
-                    val isSelected = pagerState.currentPage == index
-                    val dotWidth by animateDpAsState(
-                        targetValue = if (isSelected) 26.dp else 8.dp,
-                        animationSpec = Motion.mediumTween(),
-                        label = "dotWidth"
-                    )
-                    val dotColor = if (isSelected) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.outlineVariant
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .height(8.dp)
-                            .width(dotWidth)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(dotColor)
-                    )
-                }
-            }
-
-            // Tombol Aksi Bawah
-            if (pagerState.currentPage < 2) {
+                // Indikator Titik Halaman
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.semantics { contentDescription = indicatorDesc }
                 ) {
+                    repeat(3) { index ->
+                        val isSelected = pagerState.currentPage == index
+                        val dotWidth by animateDpAsState(
+                            targetValue = if (isSelected) 26.dp else 8.dp,
+                            animationSpec = Motion.mediumTween(),
+                            label = "dotWidth"
+                        )
+                        val dotColor = if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.outlineVariant
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .height(8.dp)
+                                .width(dotWidth)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(dotColor)
+                        )
+                    }
+                }
+
+                // Tombol Aksi
+                if (pagerState.currentPage < 2) {
                     FilledTonalButton(
                         onClick = {
                             coroutineScope.launch {
@@ -233,7 +235,7 @@ fun OnboardingScreen(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ),
-                        modifier = Modifier.height(48.dp)
+                        modifier = Modifier.height(44.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.onboarding_next),
@@ -246,23 +248,112 @@ fun OnboardingScreen(
                             modifier = Modifier.size(18.dp)
                         )
                     }
+                } else {
+                    Button(
+                        onClick = onFinishOnboarding,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier.height(44.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.onboarding_start),
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
                 }
-            } else {
-                Button(
-                    onClick = onFinishOnboarding,
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.White
-                    ),
+            }
+        } else {
+            // Tampilan Portrait: Indikator di atas tombol aksi
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
+                        .padding(bottom = 20.dp)
+                        .semantics { contentDescription = indicatorDesc }
                 ) {
-                    Text(
-                        text = stringResource(R.string.onboarding_start),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                    )
+                    repeat(3) { index ->
+                        val isSelected = pagerState.currentPage == index
+                        val dotWidth by animateDpAsState(
+                            targetValue = if (isSelected) 26.dp else 8.dp,
+                            animationSpec = Motion.mediumTween(),
+                            label = "dotWidth"
+                        )
+                        val dotColor = if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.outlineVariant
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .height(8.dp)
+                                .width(dotWidth)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(dotColor)
+                        )
+                    }
+                }
+
+                // Tombol Aksi Bawah
+                if (pagerState.currentPage < 2) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        FilledTonalButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(
+                                        page = pagerState.currentPage + 1,
+                                        animationSpec = Motion.mediumTween()
+                                    )
+                                }
+                            },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            modifier = Modifier.height(48.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.onboarding_next),
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                } else {
+                    Button(
+                        onClick = onFinishOnboarding,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.onboarding_start),
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
                 }
             }
         }
@@ -278,6 +369,7 @@ private fun OnboardingPageContent(
     isCurrentPage: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val windowInfo = rememberWindowInfo()
     val scrollState = rememberScrollState()
 
     val (icon, titleRes, descRes) = when (pageIndex) {
@@ -310,26 +402,102 @@ private fun OnboardingPageContent(
         label = "illustrationAlpha"
     )
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(horizontal = 28.dp, vertical = 12.dp)
-    ) {
-        Spacer(modifier = Modifier.weight(1f, fill = false))
-
-        // Lingkaran Bergradien Elegan dengan Ikon Material Besar
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(170.dp)
-                .graphicsLayer {
-                    scaleX = illustrationScale
-                    scaleY = illustrationScale
-                    alpha = illustrationAlpha
+    if (windowInfo.isLandscape) {
+        // Mode Landscape: 2 Kolom (Kiri: Ilustrasi, Kanan: Judul & Deskripsi scrollable)
+        Row(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 28.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .graphicsLayer {
+                        scaleX = illustrationScale
+                        scaleY = illustrationScale
+                        alpha = illustrationAlpha
+                    }
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(110.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.tertiary
+                                )
+                            )
+                        )
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(52.dp)
+                    )
                 }
+            }
+
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .weight(1.3f)
+                    .verticalScroll(scrollState)
+                    .padding(end = 8.dp)
+            ) {
+                Text(
+                    text = stringResource(titleRes),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        lineHeight = 26.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = stringResource(descRes),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        lineHeight = 20.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    } else {
+        // Mode Portrait: Tampilan Kolom Vertikal tunggal
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(horizontal = 28.dp, vertical = 12.dp)
+        ) {
+            Spacer(modifier = Modifier.weight(1f, fill = false))
+
+            // Lingkaran Bergradien Elegan dengan Ikon Material Besar
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(170.dp)
+                    .graphicsLayer {
+                        scaleX = illustrationScale
+                        scaleY = illustrationScale
+                        alpha = illustrationAlpha
+                    }
                 .clip(CircleShape)
                 .background(
                     Brush.linearGradient(
@@ -339,42 +507,43 @@ private fun OnboardingPageContent(
                         )
                     )
                 )
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(72.dp)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(72.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(36.dp))
+
+            // Judul Onboarding
+            Text(
+                text = stringResource(titleRes),
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    lineHeight = 32.sp
+                ),
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Deskripsi Onboarding
+            Text(
+                text = stringResource(descRes),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    lineHeight = 24.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.weight(1f, fill = false))
         }
-
-        Spacer(modifier = Modifier.height(36.dp))
-
-        // Judul Onboarding
-        Text(
-            text = stringResource(titleRes),
-            style = MaterialTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.ExtraBold,
-                lineHeight = 32.sp
-            ),
-            color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        // Deskripsi Onboarding
-        Text(
-            text = stringResource(descRes),
-            style = MaterialTheme.typography.bodyLarge.copy(
-                lineHeight = 24.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.weight(1f, fill = false))
     }
 }

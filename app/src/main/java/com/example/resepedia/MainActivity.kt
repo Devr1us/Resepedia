@@ -6,6 +6,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.os.LocaleListCompat
@@ -15,6 +18,7 @@ import com.example.resepedia.data.AppThemeMode
 import com.example.resepedia.ui.MainViewModel
 import com.example.resepedia.ui.navigation.AppNavigation
 import com.example.resepedia.ui.theme.ResepediaTheme
+import com.example.resepedia.ui.util.LocalWindowSizeClass
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         )[MainViewModel::class.java]
     }
 
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         // Pasang splash screen sistem sebelum super.onCreate()
         val splashScreen = installSplashScreen()
@@ -51,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         isAppReady = true
 
         setContent {
+            val windowSizeClass = calculateWindowSizeClass(this)
             val themeMode by viewModel.themeMode.collectAsState()
 
             // Menentukan tema berdasarkan preferensi (Ikuti Sistem, Terang, Gelap)
@@ -60,10 +66,12 @@ class MainActivity : AppCompatActivity() {
                 AppThemeMode.DARK -> true
             }
 
-            ResepediaTheme(darkTheme = isDarkTheme) {
-                AppNavigation(
-                    viewModel = viewModel
-                )
+            CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
+                ResepediaTheme(darkTheme = isDarkTheme) {
+                    AppNavigation(
+                        viewModel = viewModel
+                    )
+                }
             }
         }
     }
