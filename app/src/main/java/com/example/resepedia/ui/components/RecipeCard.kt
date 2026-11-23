@@ -1,8 +1,12 @@
 package com.example.resepedia.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,11 +32,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +50,7 @@ import coil3.compose.AsyncImage
 import com.example.resepedia.R
 import com.example.resepedia.model.MealSummary
 import com.example.resepedia.ui.theme.HeartRed
+import com.example.resepedia.ui.theme.Motion
 
 @Composable
 fun RecipeCard(
@@ -53,11 +61,36 @@ fun RecipeCard(
     modifier: Modifier = Modifier,
     categoryBadge: String? = null
 ) {
+    // Animasi skala saat kartu ditekan (press state)
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val cardScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        animationSpec = Motion.shortTween(),
+        label = "recipeCardPressScale"
+    )
+
+    // Efek "pop" pada tombol hati saat status difavoritkan aktif
+    val heartPopScale = remember { Animatable(1f) }
+    LaunchedEffect(isFavorite) {
+        if (isFavorite) {
+            heartPopScale.animateTo(1.35f, animationSpec = Motion.shortTween())
+            heartPopScale.animateTo(1f, animationSpec = Motion.shortTween())
+        }
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = cardScale
+                scaleY = cardScale
+            }
             .clip(RoundedCornerShape(20.dp))
-            .clickable { meal.idMeal?.let { onMealClick(it) } },
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { meal.idMeal?.let { onMealClick(it) } },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -104,7 +137,12 @@ fun RecipeCard(
                             if (isFavorite) R.string.btn_favorite_remove else R.string.btn_favorite_add
                         ),
                         tint = heartColor,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier
+                            .size(18.dp)
+                            .graphicsLayer {
+                                scaleX = heartPopScale.value
+                                scaleY = heartPopScale.value
+                            }
                     )
                 }
             }

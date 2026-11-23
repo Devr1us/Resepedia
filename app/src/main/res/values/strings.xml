@@ -68,6 +68,21 @@
     <string name="area_argentinian">Argentinian</string>
     <string name="area_australian">Australian</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_title_1">Discover Thousands of Recipes</string>
+    <string name="onboarding_desc_1">Explore a variety of delicious culinary inspirations across different categories and origins worldwide.</string>
+    <string name="onboarding_title_2">Search and Explore</string>
+    <string name="onboarding_desc_2">Quickly find recipes by dish name or ingredients you have in your kitchen.</string>
+    <string name="onboarding_title_3">Save Your Favorites</string>
+    <string name="onboarding_desc_3">Bookmark your best dishes with a single tap. Complete with light &amp; dark theme and bilingual support.</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_start">Get Started</string>
+    <string name="onboarding_language">Language</string>
+    <string name="onboarding_page_indicator_desc">Page %1$d of %2$d</string>
+    <string name="settings_replay_onboarding">App Walkthrough</string>
+    <string name="settings_replay_onboarding_desc">Show the 3-page onboarding guide again</string>
+
     <!-- Pengaturan (Settings) -->
     <string name="settings_title">Settings</string>
     <string name="settings_appearance">Appearance</string>

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
@@ -75,6 +76,7 @@ import com.example.resepedia.ui.components.SettingsSectionCard
 fun SettingsScreen(
     viewModel: MainViewModel,
     onNavigateBack: () -> Unit,
+    onNavigateToOnboarding: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -326,6 +328,17 @@ fun SettingsScreen(
                     icon = Icons.Outlined.Info,
                     title = stringResource(R.string.settings_disclaimer),
                     subtitle = null
+                )
+
+                // Baris Putar Ulang Onboarding (Panduan Pengantar Aplikasi)
+                SettingsInfoRow(
+                    icon = Icons.Outlined.AutoStories,
+                    title = stringResource(R.string.settings_replay_onboarding),
+                    subtitle = stringResource(R.string.settings_replay_onboarding_desc),
+                    onClick = {
+                        viewModel.setOnboardingDone(false)
+                        onNavigateToOnboarding()
+                    }
                 )
             }
         }

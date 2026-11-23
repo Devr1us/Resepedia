@@ -1,5 +1,12 @@
 package com.example.resepedia.ui.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -33,8 +40,10 @@ import com.example.resepedia.ui.screens.AreaScreen
 import com.example.resepedia.ui.screens.DashboardScreen
 import com.example.resepedia.ui.screens.DetailScreen
 import com.example.resepedia.ui.screens.FavoritesScreen
+import com.example.resepedia.ui.screens.OnboardingScreen
 import com.example.resepedia.ui.screens.SettingsScreen
 import com.example.resepedia.ui.screens.SplashScreen
+import com.example.resepedia.ui.theme.Motion
 
 @Composable
 fun AppNavigation(
@@ -45,18 +54,35 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Tampilkan bottom navigation bar pada Dashboard, Areas (Negara), dan Favorites
+    // Tampilkan bottom navigation bar hanya pada 3 tab utama: Dashboard, Areas, dan Favorites
     val showBottomBar = currentRoute == Screen.Dashboard.route ||
             currentRoute == Screen.Areas.route ||
             currentRoute == Screen.Favorites.route
 
-    // Tentukan startDestination: jika splash sudah pernah tampil, langsung ke Dashboard
-    val startDestination = if (viewModel.splashShown) Screen.Dashboard.route else Screen.Splash.route
+    // Tentukan startDestination: Onboarding bila belum selesai, Dashboard bila sudah
+    val startDestination = if (viewModel.isOnboardingDone()) {
+        Screen.Dashboard.route
+    } else {
+        Screen.Onboarding.route
+    }
+
+    val tabRoutes = listOf(Screen.Dashboard.route, Screen.Areas.route, Screen.Favorites.route)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         bottomBar = {
-            if (showBottomBar) {
+            // Bottom bar muncul/hilang dengan AnimatedVisibility (slide vertikal + fade)
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = slideInVertically(
+                    initialOffsetY = { it },
+                    animationSpec = Motion.mediumTween()
+                ) + fadeIn(animationSpec = Motion.mediumTween()),
+                exit = slideOutVertically(
+                    targetOffsetY = { it },
+                    animationSpec = Motion.mediumTween()
+                ) + fadeOut(animationSpec = Motion.mediumTween())
+            ) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.primary
@@ -92,7 +118,7 @@ fun AppNavigation(
                         )
                     )
 
-                    // 2. Item Negara (Jelajah Negara)
+                    // 2. Item Jelajah Negara / Area
                     val isAreasSelected = currentRoute == Screen.Areas.route
                     NavigationBarItem(
                         selected = isAreasSelected,
@@ -160,20 +186,89 @@ fun AppNavigation(
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { (it * 0.15f).toInt() },
+                    animationSpec = Motion.mediumTween()
+                ) + fadeIn(animationSpec = Motion.mediumTween())
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -(it * 0.15f).toInt() },
+                    animationSpec = Motion.mediumTween()
+                ) + fadeOut(animationSpec = Motion.mediumTween())
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -(it * 0.15f).toInt() },
+                    animationSpec = Motion.mediumTween()
+                ) + fadeIn(animationSpec = Motion.mediumTween())
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { (it * 0.15f).toInt() },
+                    animationSpec = Motion.mediumTween()
+                ) + fadeOut(animationSpec = Motion.mediumTween())
+            }
         ) {
-            composable(Screen.Splash.route) {
+            // Rute Onboarding (Hanya muncul saat pertama kali dibuka)
+            composable(
+                route = Screen.Onboarding.route,
+                enterTransition = { fadeIn(animationSpec = Motion.mediumTween()) },
+                exitTransition = { fadeOut(animationSpec = Motion.mediumTween()) }
+            ) {
+                OnboardingScreen(
+                    viewModel = viewModel,
+                    onFinishOnboarding = {
+                        viewModel.setOnboardingDone(true)
+                        navController.navigate(Screen.Dashboard.route) {
+                            popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            // Rute Splash (Tetap disediakan bila dibutuhkan secara langsung)
+            composable(
+                route = Screen.Splash.route,
+                exitTransition = { fadeOut(animationSpec = Motion.mediumTween()) }
+            ) {
                 SplashScreen(
                     onSplashFinished = {
                         viewModel.markSplashShown()
-                        navController.navigate(Screen.Dashboard.route) {
+                        val targetRoute = if (viewModel.isOnboardingDone()) {
+                            Screen.Dashboard.route
+                        } else {
+                            Screen.Onboarding.route
+                        }
+                        navController.navigate(targetRoute) {
                             popUpTo(Screen.Splash.route) { inclusive = true }
                         }
                     }
                 )
             }
 
-            composable(Screen.Dashboard.route) {
+            // Tab Beranda / Dashboard (Pindah antar-tab memakai fade saja tanpa slide)
+            composable(
+                route = Screen.Dashboard.route,
+                enterTransition = {
+                    if (initialState.destination.route in tabRoutes || initialState.destination.route == Screen.Onboarding.route) {
+                        fadeIn(animationSpec = Motion.mediumTween())
+                    } else {
+                        slideInHorizontally(initialOffsetX = { (it * 0.15f).toInt() }, animationSpec = Motion.mediumTween()) +
+                            fadeIn(animationSpec = Motion.mediumTween())
+                    }
+                },
+                exitTransition = {
+                    if (targetState.destination.route in tabRoutes) {
+                        fadeOut(animationSpec = Motion.mediumTween())
+                    } else {
+                        slideOutHorizontally(targetOffsetX = { -(it * 0.15f).toInt() }, animationSpec = Motion.mediumTween()) +
+                            fadeOut(animationSpec = Motion.mediumTween())
+                    }
+                }
+            ) {
                 DashboardScreen(
                     viewModel = viewModel,
                     onNavigateToDetail = { mealId ->
@@ -185,7 +280,26 @@ fun AppNavigation(
                 )
             }
 
-            composable(Screen.Areas.route) {
+            // Tab Jelajah Negara / Areas (Fade antar-tab)
+            composable(
+                route = Screen.Areas.route,
+                enterTransition = {
+                    if (initialState.destination.route in tabRoutes) {
+                        fadeIn(animationSpec = Motion.mediumTween())
+                    } else {
+                        slideInHorizontally(initialOffsetX = { (it * 0.15f).toInt() }, animationSpec = Motion.mediumTween()) +
+                            fadeIn(animationSpec = Motion.mediumTween())
+                    }
+                },
+                exitTransition = {
+                    if (targetState.destination.route in tabRoutes) {
+                        fadeOut(animationSpec = Motion.mediumTween())
+                    } else {
+                        slideOutHorizontally(targetOffsetX = { -(it * 0.15f).toInt() }, animationSpec = Motion.mediumTween()) +
+                            fadeOut(animationSpec = Motion.mediumTween())
+                    }
+                }
+            ) {
                 AreaScreen(
                     viewModel = viewModel,
                     onNavigateToDetail = { mealId ->
@@ -194,7 +308,26 @@ fun AppNavigation(
                 )
             }
 
-            composable(Screen.Favorites.route) {
+            // Tab Favorit (Fade antar-tab)
+            composable(
+                route = Screen.Favorites.route,
+                enterTransition = {
+                    if (initialState.destination.route in tabRoutes) {
+                        fadeIn(animationSpec = Motion.mediumTween())
+                    } else {
+                        slideInHorizontally(initialOffsetX = { (it * 0.15f).toInt() }, animationSpec = Motion.mediumTween()) +
+                            fadeIn(animationSpec = Motion.mediumTween())
+                    }
+                },
+                exitTransition = {
+                    if (targetState.destination.route in tabRoutes) {
+                        fadeOut(animationSpec = Motion.mediumTween())
+                    } else {
+                        slideOutHorizontally(targetOffsetX = { -(it * 0.15f).toInt() }, animationSpec = Motion.mediumTween()) +
+                            fadeOut(animationSpec = Motion.mediumTween())
+                    }
+                }
+            ) {
                 FavoritesScreen(
                     viewModel = viewModel,
                     onNavigateToDetail = { mealId ->
@@ -203,11 +336,27 @@ fun AppNavigation(
                 )
             }
 
+            // Layar Detail: Masuk dengan slide dari kanan + fade, keluar sebaliknya
             composable(
                 route = Screen.Detail.route,
                 arguments = listOf(
                     navArgument("mealId") { type = NavType.StringType }
-                )
+                ),
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }, animationSpec = Motion.mediumTween()) +
+                        fadeIn(animationSpec = Motion.mediumTween())
+                },
+                exitTransition = {
+                    slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }, animationSpec = Motion.mediumTween()) +
+                        fadeOut(animationSpec = Motion.mediumTween())
+                },
+                popEnterTransition = {
+                    fadeIn(animationSpec = Motion.mediumTween())
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }, animationSpec = Motion.mediumTween()) +
+                        fadeOut(animationSpec = Motion.mediumTween())
+                }
             ) { backStackEntry ->
                 val mealId = backStackEntry.arguments?.getString("mealId").orEmpty()
                 DetailScreen(
@@ -217,10 +366,31 @@ fun AppNavigation(
                 )
             }
 
-            composable(Screen.Settings.route) {
+            // Layar Pengaturan: Masuk dengan slide dari kanan + fade
+            composable(
+                route = Screen.Settings.route,
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { (it * 0.2f).toInt() }, animationSpec = Motion.mediumTween()) +
+                        fadeIn(animationSpec = Motion.mediumTween())
+                },
+                exitTransition = {
+                    slideOutHorizontally(targetOffsetX = { -(it * 0.15f).toInt() }, animationSpec = Motion.mediumTween()) +
+                        fadeOut(animationSpec = Motion.mediumTween())
+                },
+                popEnterTransition = {
+                    fadeIn(animationSpec = Motion.mediumTween())
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { (it * 0.2f).toInt() }, animationSpec = Motion.mediumTween()) +
+                        fadeOut(animationSpec = Motion.mediumTween())
+                }
+            ) {
                 SettingsScreen(
                     viewModel = viewModel,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToOnboarding = {
+                        navController.navigate(Screen.Onboarding.route)
+                    }
                 )
             }
         }

@@ -409,6 +409,14 @@ class MainViewModel(
         retranslateCurrentContent()
     }
 
+    fun isOnboardingDone(): Boolean {
+        return preferencesManager.isOnboardingDone()
+    }
+
+    fun setOnboardingDone(done: Boolean) {
+        preferencesManager.setOnboardingDone(done)
+    }
+
     override fun onCleared() {
         super.onCleared()
         translationManager.close()

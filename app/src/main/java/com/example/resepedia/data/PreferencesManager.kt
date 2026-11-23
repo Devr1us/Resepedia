@@ -73,9 +73,18 @@ class PreferencesManager(context: Context) {
         prefs.edit().putString(KEY_LANGUAGE, langCode).apply()
     }
 
+    fun isOnboardingDone(): Boolean {
+        return prefs.getBoolean(KEY_ONBOARDING_DONE, false)
+    }
+
+    fun setOnboardingDone(done: Boolean) {
+        prefs.edit().putBoolean(KEY_ONBOARDING_DONE, done).apply()
+    }
+
     companion object {
         private const val KEY_THEME_MODE = "key_theme_mode"
         private const val KEY_FAVORITES = "key_favorites"
         private const val KEY_LANGUAGE = "key_language"
+        private const val KEY_ONBOARDING_DONE = "key_onboarding_done"
     }
 }

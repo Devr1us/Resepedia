@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -29,6 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +49,7 @@ import com.example.resepedia.ui.components.ErrorView
 import com.example.resepedia.ui.components.RecipeCard
 import com.example.resepedia.ui.components.RecipeCardSkeleton
 import com.example.resepedia.ui.components.rememberShimmerBrush
+import com.example.resepedia.ui.theme.staggeredEntrance
 import com.example.resepedia.ui.util.areaDisplayName
 import com.example.resepedia.ui.util.getAreaFlag
 
@@ -73,6 +78,12 @@ fun AreaScreen(
     val favoriteIds by viewModel.favoriteIds.collectAsState()
     val translations by viewModel.translations.collectAsState()
     val shimmerBrush = rememberShimmerBrush()
+
+    // State untuk memastikan animasi staggered entrance hanya diputar sekali saat layar dibuka
+    var hasAnimatedEntrance by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        hasAnimatedEntrance = true
+    }
 
     val currentArea = selectedArea.orEmpty()
     val translatedAreaName = if (selectedArea != null) areaDisplayName(currentArea) else ""
@@ -144,17 +155,23 @@ fun AreaScreen(
                             )
                         }
                     } else {
-                        items(
+                        itemsIndexed(
                             items = areas,
-                            key = { "area_$it" }
-                        ) { area ->
+                            key = { _, it -> "area_$it" }
+                        ) { index, area ->
                             val flag = getAreaFlag(area)
                             val displayName = areaDisplayName(area)
                             AreaCard(
                                 areaName = area,
                                 displayName = displayName,
                                 flagEmoji = flag,
-                                onClick = { viewModel.selectArea(area) }
+                                onClick = { viewModel.selectArea(area) },
+                                modifier = Modifier
+                                    .animateItem()
+                                    .staggeredEntrance(
+                                        index = index,
+                                        enabled = !hasAnimatedEntrance
+                                    )
                             )
                         }
                     }
@@ -230,10 +247,10 @@ fun AreaScreen(
                             )
                         }
                     } else {
-                        items(
+                        itemsIndexed(
                             items = meals,
-                            key = { "area_meal_${it.idMeal ?: it.hashCode()}" }
-                        ) { meal ->
+                            key = { _, it -> "area_meal_${it.idMeal ?: it.hashCode()}" }
+                        ) { index, meal ->
                             val translatedTitle = translations[meal.strMeal] ?: meal.strMeal
                             val translatedMeal = meal.copy(strMeal = translatedTitle)
                             RecipeCard(
@@ -241,7 +258,13 @@ fun AreaScreen(
                                 isFavorite = favoriteIds.contains(meal.idMeal.orEmpty()),
                                 onMealClick = onNavigateToDetail,
                                 onToggleFavorite = { viewModel.toggleFavorite(it) },
-                                categoryBadge = "$translatedAreaName $flagEmoji"
+                                categoryBadge = "$translatedAreaName $flagEmoji",
+                                modifier = Modifier
+                                    .animateItem()
+                                    .staggeredEntrance(
+                                        index = index,
+                                        enabled = !hasAnimatedEntrance
+                                    )
                             )
                         }
                     }

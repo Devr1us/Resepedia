@@ -27,7 +27,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Pasang splash screen sistem sebelum super.onCreate()
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
+
+        var isAppReady = false
+        val startTime = System.currentTimeMillis()
+        splashScreen.setKeepOnScreenCondition {
+            !isAppReady && (System.currentTimeMillis() - startTime < 1000L)
+        }
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -40,6 +46,9 @@ class MainActivity : AppCompatActivity() {
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(savedLang))
             }
         }
+
+        // Tandai bahwa preferensi awal aplikasi telah siap
+        isAppReady = true
 
         setContent {
             val themeMode by viewModel.themeMode.collectAsState()

@@ -1,8 +1,10 @@
 package com.example.resepedia.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +23,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -40,8 +44,12 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,7 +74,9 @@ import com.example.resepedia.ui.components.HeroSkeleton
 import com.example.resepedia.ui.components.RecipeCard
 import com.example.resepedia.ui.components.RecipeCardSkeleton
 import com.example.resepedia.ui.components.rememberShimmerBrush
+import com.example.resepedia.ui.theme.Motion
 import com.example.resepedia.ui.theme.PrimaryOrange
+import com.example.resepedia.ui.theme.staggeredEntrance
 
 @Composable
 fun DashboardScreen(
@@ -85,6 +95,23 @@ fun DashboardScreen(
     val translations by viewModel.translations.collectAsState()
     val shimmerBrush = rememberShimmerBrush()
     val focusManager = LocalFocusManager.current
+
+    // Penanda animasi bertahap awal hanya berjalan sekali per kunjungan layar
+    var hasAnimatedEntrance by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        hasAnimatedEntrance = true
+    }
+
+    val categoryListState = rememberLazyListState()
+    LaunchedEffect(selectedCategory) {
+        val catData = (categoriesState as? UiState.Success)?.data
+        if (catData != null) {
+            val idx = catData.indexOfFirst { it.strCategory.equals(selectedCategory, ignoreCase = true) }
+            if (idx >= 0) {
+                categoryListState.animateScrollToItem(idx)
+            }
+        }
+    }
 
     // Single LazyVerticalGrid utama (kolom tetap 2 di portrait maupun landscape)
     LazyVerticalGrid(
@@ -207,12 +234,18 @@ fun DashboardScreen(
         // Jika Sedang Mencari (Search Mode)
         if (searchQuery.isNotBlank()) {
             item(span = { GridItemSpan(maxLineSpan) }, key = "search_results_header") {
-                Text(
-                    text = stringResource(R.string.search_results_title, searchQuery),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                AnimatedVisibility(
+                    visible = searchQuery.isNotBlank(),
+                    enter = fadeIn(Motion.mediumTween()) + expandVertically(animationSpec = Motion.mediumTween()),
+                    exit = fadeOut(Motion.shortTween()) + shrinkVertically(animationSpec = Motion.shortTween())
+                ) {
+                    Text(
+                        text = stringResource(R.string.search_results_title, searchQuery),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             }
 
             when (val result = searchResultsState) {
@@ -236,14 +269,17 @@ fun DashboardScreen(
                             )
                         }
                     } else {
-                        items(
+                        itemsIndexed(
                             items = meals,
-                            key = { "search_${it.idMeal ?: it.hashCode()}" }
-                        ) { meal ->
+                            key = { _, it -> "search_${it.idMeal ?: it.hashCode()}" }
+                        ) { index, meal ->
                             val translatedMeal = meal.copy(
                                 strMeal = translations[meal.strMeal] ?: meal.strMeal
                             )
                             RecipeCard(
+                                modifier = Modifier
+                                    .animateItem()
+                                    .staggeredEntrance(index = index, enabled = !hasAnimatedEntrance),
                                 meal = translatedMeal,
                                 isFavorite = favoriteIds.contains(meal.idMeal.orEmpty()),
                                 onMealClick = onNavigateToDetail,
@@ -308,6 +344,7 @@ fun DashboardScreen(
                         is UiState.Error -> ErrorView(onRetry = { viewModel.loadCategories() })
                         is UiState.Success -> {
                             LazyRow(
+                                state = categoryListState,
                                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 contentPadding = PaddingValues(horizontal = 2.dp)
                             ) {
@@ -317,6 +354,7 @@ fun DashboardScreen(
                                 ) { category ->
                                     val catName = category.strCategory.orEmpty()
                                     CategoryChip(
+                                        modifier = Modifier.animateItem(),
                                         category = category,
                                         isSelected = catName.equals(selectedCategory, ignoreCase = true),
                                         onCategoryClick = { viewModel.selectCategory(it) },
@@ -354,14 +392,17 @@ fun DashboardScreen(
                 }
                 is UiState.Success -> {
                     val translatedBadge = translations[selectedCategory] ?: selectedCategory
-                    items(
+                    itemsIndexed(
                         items = mealsState.data,
-                        key = { "meal_${it.idMeal ?: it.hashCode()}" }
-                    ) { meal ->
+                        key = { _, it -> "meal_${it.idMeal ?: it.hashCode()}" }
+                    ) { index, meal ->
                         val translatedMeal = meal.copy(
                             strMeal = translations[meal.strMeal] ?: meal.strMeal
                         )
                         RecipeCard(
+                            modifier = Modifier
+                                .animateItem()
+                                .staggeredEntrance(index = index, enabled = !hasAnimatedEntrance),
                             meal = translatedMeal,
                             isFavorite = favoriteIds.contains(meal.idMeal.orEmpty()),
                             onMealClick = onNavigateToDetail,

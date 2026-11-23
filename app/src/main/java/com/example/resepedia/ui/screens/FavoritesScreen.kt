@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +34,8 @@ import com.example.resepedia.ui.components.EmptyView
 import com.example.resepedia.ui.components.ErrorView
 import com.example.resepedia.ui.components.RecipeCard
 import com.example.resepedia.ui.components.RecipeCardSkeleton
+import com.example.resepedia.ui.theme.Motion
+import com.example.resepedia.ui.theme.staggeredEntrance
 
 @Composable
 fun FavoritesScreen(
@@ -44,6 +50,11 @@ fun FavoritesScreen(
     val favoritesState by viewModel.favoritesState.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
     val translations by viewModel.translations.collectAsState()
+
+    var hasAnimatedEntrance by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        hasAnimatedEntrance = true
+    }
 
     Column(
         modifier = modifier
@@ -91,14 +102,17 @@ fun FavoritesScreen(
                             )
                         }
                     } else {
-                        items(
+                        itemsIndexed(
                             items = meals,
-                            key = { "fav_${it.idMeal ?: it.hashCode()}" }
-                        ) { meal ->
+                            key = { _, it -> "fav_${it.idMeal ?: it.hashCode()}" }
+                        ) { index, meal ->
                             val translatedMeal = meal.copy(
                                 strMeal = translations[meal.strMeal] ?: meal.strMeal
                             )
                             RecipeCard(
+                                modifier = Modifier
+                                    .animateItem()
+                                    .staggeredEntrance(index = index, enabled = !hasAnimatedEntrance),
                                 meal = translatedMeal,
                                 isFavorite = true,
                                 onMealClick = onNavigateToDetail,

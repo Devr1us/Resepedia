@@ -1,5 +1,6 @@
 package com.example.resepedia.ui.components
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,14 +21,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.resepedia.R
+import com.example.resepedia.ui.theme.Motion
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoadingView(modifier: Modifier = Modifier) {
@@ -64,9 +70,22 @@ fun ErrorView(
     description: String = stringResource(R.string.error_connection_desc),
     icon: ImageVector = Icons.Outlined.WifiOff
 ) {
+    // Animasi kemunculan halus (fade + skala kecil)
+    val animScale = remember { Animatable(0.92f) }
+    val animAlpha = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        launch { animScale.animateTo(1f, animationSpec = Motion.mediumTween()) }
+        launch { animAlpha.animateTo(1f, animationSpec = Motion.mediumTween()) }
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = animScale.value
+                scaleY = animScale.value
+                alpha = animAlpha.value
+            }
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -115,9 +134,22 @@ fun EmptyView(
     modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Outlined.SearchOff
 ) {
+    // Animasi kemunculan halus (fade + skala kecil)
+    val animScale = remember { Animatable(0.92f) }
+    val animAlpha = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        launch { animScale.animateTo(1f, animationSpec = Motion.mediumTween()) }
+        launch { animAlpha.animateTo(1f, animationSpec = Motion.mediumTween()) }
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = animScale.value
+                scaleY = animScale.value
+                alpha = animAlpha.value
+            }
             .padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
