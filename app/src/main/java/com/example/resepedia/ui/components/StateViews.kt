@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.outlined.WifiOff
@@ -46,7 +44,6 @@ fun LoadingView(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
             .padding(if (isCompact) 16.dp else 32.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -91,7 +88,6 @@ fun ErrorView(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
             .graphicsLayer {
                 scaleX = animScale.value
                 scaleY = animScale.value
@@ -159,7 +155,6 @@ fun EmptyView(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
             .graphicsLayer {
                 scaleX = animScale.value
                 scaleY = animScale.value

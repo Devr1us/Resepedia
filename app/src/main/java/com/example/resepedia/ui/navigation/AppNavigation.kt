@@ -7,6 +7,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -34,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -79,246 +81,276 @@ fun AppNavigation(
 
     val tabRoutes = listOf(Screen.Dashboard.route, Screen.Areas.route, Screen.Favorites.route)
 
-    Row(modifier = modifier.fillMaxSize()) {
-        // NavigationRail pada layar Landscape atau Layar Lebar/Tablet
-        AnimatedVisibility(
-            visible = showBottomBar && useNavRail,
-            enter = slideInHorizontally(
-                initialOffsetX = { -it },
-                animationSpec = Motion.mediumTween()
-            ) + fadeIn(animationSpec = Motion.mediumTween()),
-            exit = slideOutHorizontally(
-                targetOffsetX = { -it },
-                animationSpec = Motion.mediumTween()
-            ) + fadeOut(animationSpec = Motion.mediumTween())
-        ) {
-            NavigationRail(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxHeight()
+    if (useNavRail) {
+        Row(modifier = modifier.fillMaxSize()) {
+            // NavigationRail pada layar Landscape atau Layar Lebar/Tablet
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = slideInHorizontally(
+                    initialOffsetX = { -it },
+                    animationSpec = Motion.mediumTween()
+                ) + fadeIn(animationSpec = Motion.mediumTween()),
+                exit = slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = Motion.mediumTween()
+                ) + fadeOut(animationSpec = Motion.mediumTween())
             ) {
-                Spacer(modifier = Modifier.weight(1f))
+                NavigationRail(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxHeight()
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
 
-                // 1. Beranda
-                val isHomeSelected = currentRoute == Screen.Dashboard.route
-                NavigationRailItem(
-                    selected = isHomeSelected,
-                    onClick = {
-                        if (!isHomeSelected) {
-                            navController.navigate(Screen.Dashboard.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                    // 1. Beranda
+                    val isHomeSelected = currentRoute == Screen.Dashboard.route
+                    NavigationRailItem(
+                        selected = isHomeSelected,
+                        onClick = {
+                            if (!isHomeSelected) {
+                                navController.navigate(Screen.Dashboard.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
                             }
-                        }
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = if (isHomeSelected) Icons.Filled.Home else Icons.Outlined.Home,
-                            contentDescription = stringResource(R.string.nav_home_desc)
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = if (isHomeSelected) Icons.Filled.Home else Icons.Outlined.Home,
+                                contentDescription = stringResource(R.string.nav_home_desc)
+                            )
+                        },
+                        label = { Text(text = stringResource(R.string.nav_home)) },
+                        colors = NavigationRailItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    },
-                    label = { Text(text = stringResource(R.string.nav_home)) },
-                    colors = NavigationRailItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                )
 
-                Spacer(modifier = Modifier.weight(0.2f))
+                    Spacer(modifier = Modifier.weight(0.2f))
 
-                // 2. Jelajah Negara
-                val isAreasSelected = currentRoute == Screen.Areas.route
-                NavigationRailItem(
-                    selected = isAreasSelected,
-                    onClick = {
-                        if (!isAreasSelected) {
-                            navController.navigate(Screen.Areas.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                    // 2. Jelajah Negara
+                    val isAreasSelected = currentRoute == Screen.Areas.route
+                    NavigationRailItem(
+                        selected = isAreasSelected,
+                        onClick = {
+                            if (!isAreasSelected) {
+                                navController.navigate(Screen.Areas.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
                             }
-                        }
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = if (isAreasSelected) Icons.Filled.Public else Icons.Outlined.Public,
-                            contentDescription = stringResource(R.string.nav_areas_desc)
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = if (isAreasSelected) Icons.Filled.Public else Icons.Outlined.Public,
+                                contentDescription = stringResource(R.string.nav_areas_desc)
+                            )
+                        },
+                        label = { Text(text = stringResource(R.string.nav_areas)) },
+                        colors = NavigationRailItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    },
-                    label = { Text(text = stringResource(R.string.nav_areas)) },
-                    colors = NavigationRailItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                )
 
-                Spacer(modifier = Modifier.weight(0.2f))
+                    Spacer(modifier = Modifier.weight(0.2f))
 
-                // 3. Favorit
-                val isFavSelected = currentRoute == Screen.Favorites.route
-                NavigationRailItem(
-                    selected = isFavSelected,
-                    onClick = {
-                        if (!isFavSelected) {
-                            navController.navigate(Screen.Favorites.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                    // 3. Favorit
+                    val isFavSelected = currentRoute == Screen.Favorites.route
+                    NavigationRailItem(
+                        selected = isFavSelected,
+                        onClick = {
+                            if (!isFavSelected) {
+                                navController.navigate(Screen.Favorites.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
                             }
-                        }
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = if (isFavSelected) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = stringResource(R.string.nav_favorite_desc)
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = if (isFavSelected) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                                contentDescription = stringResource(R.string.nav_favorite_desc)
+                            )
+                        },
+                        label = { Text(text = stringResource(R.string.nav_favorite)) },
+                        colors = NavigationRailItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    },
-                    label = { Text(text = stringResource(R.string.nav_favorite)) },
-                    colors = NavigationRailItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                )
 
-                Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+
+            Scaffold(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) { innerPadding ->
+                ResepediaNavHost(
+                    navController = navController,
+                    startDestination = startDestination,
+                    innerPadding = innerPadding,
+                    tabRoutes = tabRoutes,
+                    viewModel = viewModel
+                )
             }
         }
-
+    } else {
         Scaffold(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
+            modifier = modifier.fillMaxSize(),
             bottomBar = {
-                // Bottom bar hanya tampil di Portrait
-                if (!useNavRail) {
-                    AnimatedVisibility(
-                        visible = showBottomBar,
-                        enter = slideInVertically(
-                            initialOffsetY = { it },
-                            animationSpec = Motion.mediumTween()
-                        ) + fadeIn(animationSpec = Motion.mediumTween()),
-                        exit = slideOutVertically(
-                            targetOffsetY = { it },
-                            animationSpec = Motion.mediumTween()
-                        ) + fadeOut(animationSpec = Motion.mediumTween())
+                AnimatedVisibility(
+                    visible = showBottomBar,
+                    enter = slideInVertically(
+                        initialOffsetY = { it },
+                        animationSpec = Motion.mediumTween()
+                    ) + fadeIn(animationSpec = Motion.mediumTween()),
+                    exit = slideOutVertically(
+                        targetOffsetY = { it },
+                        animationSpec = Motion.mediumTween()
+                    ) + fadeOut(animationSpec = Motion.mediumTween())
+                ) {
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.primary
                     ) {
-                        NavigationBar(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.primary
-                        ) {
-                            // 1. Item Beranda
-                            val isHomeSelected = currentRoute == Screen.Dashboard.route
-                            NavigationBarItem(
-                                selected = isHomeSelected,
-                                onClick = {
-                                    if (!isHomeSelected) {
-                                        navController.navigate(Screen.Dashboard.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
+                        // 1. Item Beranda
+                        val isHomeSelected = currentRoute == Screen.Dashboard.route
+                        NavigationBarItem(
+                            selected = isHomeSelected,
+                            onClick = {
+                                if (!isHomeSelected) {
+                                    navController.navigate(Screen.Dashboard.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
                                         }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                },
-                                icon = {
-                                    Icon(
-                                        imageVector = if (isHomeSelected) Icons.Filled.Home else Icons.Outlined.Home,
-                                        contentDescription = stringResource(R.string.nav_home_desc)
-                                    )
-                                },
-                                label = { Text(text = stringResource(R.string.nav_home)) },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = if (isHomeSelected) Icons.Filled.Home else Icons.Outlined.Home,
+                                    contentDescription = stringResource(R.string.nav_home_desc)
                                 )
+                            },
+                            label = { Text(text = stringResource(R.string.nav_home)) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        )
 
-                            // 2. Item Jelajah Negara / Area
-                            val isAreasSelected = currentRoute == Screen.Areas.route
-                            NavigationBarItem(
-                                selected = isAreasSelected,
-                                onClick = {
-                                    if (!isAreasSelected) {
-                                        navController.navigate(Screen.Areas.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
+                        // 2. Item Jelajah Negara / Area
+                        val isAreasSelected = currentRoute == Screen.Areas.route
+                        NavigationBarItem(
+                            selected = isAreasSelected,
+                            onClick = {
+                                if (!isAreasSelected) {
+                                    navController.navigate(Screen.Areas.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
                                         }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                },
-                                icon = {
-                                    Icon(
-                                        imageVector = if (isAreasSelected) Icons.Filled.Public else Icons.Outlined.Public,
-                                        contentDescription = stringResource(R.string.nav_areas_desc)
-                                    )
-                                },
-                                label = { Text(text = stringResource(R.string.nav_areas)) },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = if (isAreasSelected) Icons.Filled.Public else Icons.Outlined.Public,
+                                    contentDescription = stringResource(R.string.nav_areas_desc)
                                 )
+                            },
+                            label = { Text(text = stringResource(R.string.nav_areas)) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        )
 
-                            // 3. Item Favorit
-                            val isFavSelected = currentRoute == Screen.Favorites.route
-                            NavigationBarItem(
-                                selected = isFavSelected,
-                                onClick = {
-                                    if (!isFavSelected) {
-                                        navController.navigate(Screen.Favorites.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
+                        // 3. Item Favorit
+                        val isFavSelected = currentRoute == Screen.Favorites.route
+                        NavigationBarItem(
+                            selected = isFavSelected,
+                            onClick = {
+                                if (!isFavSelected) {
+                                    navController.navigate(Screen.Favorites.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
                                         }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                },
-                                icon = {
-                                    Icon(
-                                        imageVector = if (isFavSelected) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                                        contentDescription = stringResource(R.string.nav_favorite_desc)
-                                    )
-                                },
-                                label = { Text(text = stringResource(R.string.nav_favorite)) },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = if (isFavSelected) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                                    contentDescription = stringResource(R.string.nav_favorite_desc)
                                 )
+                            },
+                            label = { Text(text = stringResource(R.string.nav_favorite)) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        }
+                        )
                     }
                 }
             }
         ) { innerPadding ->
+            ResepediaNavHost(
+                navController = navController,
+                startDestination = startDestination,
+                innerPadding = innerPadding,
+                tabRoutes = tabRoutes,
+                viewModel = viewModel
+            )
+        }
+    }
+}
+
+@Composable
+private fun ResepediaNavHost(
+    navController: NavHostController,
+    startDestination: String,
+    innerPadding: PaddingValues,
+    tabRoutes: List<String>,
+    viewModel: MainViewModel
+) {
         NavHost(
             navController = navController,
             startDestination = startDestination,
@@ -574,6 +606,4 @@ fun AppNavigation(
                 )
             }
         }
-    }
-}
 }
