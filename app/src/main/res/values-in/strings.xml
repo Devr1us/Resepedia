@@ -29,6 +29,17 @@
     <string name="areas_empty_title">Tidak Ada Resep</string>
     <string name="areas_empty_desc">Belum ada resep yang tersedia untuk negara ini.</string>
     <string name="btn_back_to_areas">Kembali ke Daftar Negara</string>
+    <string name="area_no_recipes">Belum ada resep</string>
+    <string name="area_recipe_count">%1$d resep</string>
+    <string name="areas_search_placeholder">Cari negara atau masakan...</string>
+    <string name="areas_search_empty_title">Negara Tidak Ditemukan</string>
+    <string name="areas_search_empty_desc">Tidak ada negara yang cocok dengan pencarian Anda.</string>
+    <string name="areas_recipe_search_placeholder">Cari resep di negara ini...</string>
+    <string name="areas_recipe_search_results_count">%1$d resep ditemukan</string>
+    <string name="areas_empty_country_title">Belum Ada Resep dari %1$s</string>
+    <string name="areas_empty_country_desc">Database TheMealDB belum memiliki koleksi resep untuk negara ini.</string>
+    <string name="areas_btn_surprise_me">Lihat Resep Acak</string>
+    <string name="areas_btn_other_countries">Jelajahi Negara Lain</string>
 
     <!-- Nama Area / Negara (Bahasa Indonesia) -->
     <string name="area_american">Amerika</string>
@@ -95,10 +106,9 @@
     <string name="settings_tech_stack_title">Teknologi</string>
     <string name="settings_tech_stack">Jetpack Compose, Material 3, Retrofit, Coil</string>
     <string name="settings_developer">Pengembang</string>
-    <string name="settings_developer_name">Tim Resepedia</string>
+    <string name="settings_developer_name">Desiderius Aditya Setyawan</string>
     <string name="settings_disclaimer">Konten resep disediakan TheMealDB dalam bahasa Inggris.</string>
     <string name="btn_open_settings_desc">Buka Pengaturan</string>
-    <string name="theme_system">Ikuti Sistem</string>
     <string name="theme_light">Mode Terang</string>
     <string name="theme_dark">Mode Gelap</string>
     <string name="lang_english">English</string>

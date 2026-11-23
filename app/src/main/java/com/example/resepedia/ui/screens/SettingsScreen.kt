@@ -26,7 +26,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
-import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.outlined.AutoStories
@@ -189,7 +188,6 @@ fun SettingsScreen(
                 )
 
                 val themeOptions = listOf(
-                    Triple(AppThemeMode.SYSTEM, stringResource(R.string.theme_system), Icons.Filled.BrightnessAuto),
                     Triple(AppThemeMode.LIGHT, stringResource(R.string.theme_light), Icons.Filled.LightMode),
                     Triple(AppThemeMode.DARK, stringResource(R.string.theme_dark), Icons.Filled.DarkMode)
                 )

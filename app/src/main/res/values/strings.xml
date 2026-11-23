@@ -29,6 +29,17 @@
     <string name="areas_empty_title">No Recipes Found</string>
     <string name="areas_empty_desc">No recipes are available for this country yet.</string>
     <string name="btn_back_to_areas">Back to Countries</string>
+    <string name="area_no_recipes">No recipes</string>
+    <string name="area_recipe_count">%1$d recipes</string>
+    <string name="areas_search_placeholder">Search countries or cuisines...</string>
+    <string name="areas_search_empty_title">Country Not Found</string>
+    <string name="areas_search_empty_desc">No countries match your search query.</string>
+    <string name="areas_recipe_search_placeholder">Search recipes in this country...</string>
+    <string name="areas_recipe_search_results_count">%1$d recipes found</string>
+    <string name="areas_empty_country_title">No Recipes from %1$s</string>
+    <string name="areas_empty_country_desc">There are no recipes from this country in the database yet.</string>
+    <string name="areas_btn_surprise_me">Try Random Recipe</string>
+    <string name="areas_btn_other_countries">Explore Other Countries</string>
 
     <!-- Nama Area / Negara (Bahasa Inggris) -->
     <string name="area_american">American</string>
@@ -95,10 +106,9 @@
     <string name="settings_tech_stack_title">Tech Stack</string>
     <string name="settings_tech_stack">Jetpack Compose, Material 3, Retrofit, Coil</string>
     <string name="settings_developer">Developer</string>
-    <string name="settings_developer_name">Resepedia Team</string>
+    <string name="settings_developer_name">Desiderius Aditya Setyawan</string>
     <string name="settings_disclaimer">Recipe content is provided by TheMealDB in English.</string>
     <string name="btn_open_settings_desc">Open Settings</string>
-    <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="lang_english">English</string>

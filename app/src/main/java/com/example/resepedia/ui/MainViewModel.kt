@@ -12,13 +12,19 @@ import com.example.resepedia.model.CategoryItem
 import com.example.resepedia.model.MealDetail
 import com.example.resepedia.model.MealSummary
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 /**
  * Mode tab untuk Layar Pencarian Khusus
@@ -182,6 +188,13 @@ class MainViewModel(
     // State Jelajah Negara / Area
     private val _areasState = MutableStateFlow<UiState<List<String>>>(UiState.Loading)
     val areasState: StateFlow<UiState<List<String>>> = _areasState.asStateFlow()
+
+    // Cache jumlah resep per negara (Map<String, Int>)
+    private val _areaRecipeCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val areaRecipeCounts: StateFlow<Map<String, Int>> = _areaRecipeCounts.asStateFlow()
+
+    private var countCheckJob: Job? = null
+    private var loadedAreaName: String? = null
 
     private val _selectedArea = MutableStateFlow<String?>(null)
     val selectedArea: StateFlow<String?> = _selectedArea.asStateFlow()
@@ -563,9 +576,44 @@ class MainViewModel(
             try {
                 val areas = repository.getAreas()
                 _areasState.value = UiState.Success(areas)
+                checkAreaRecipeCounts(areas)
             } catch (e: Exception) {
                 _areasState.value = UiState.Error(e.localizedMessage)
             }
+        }
+    }
+
+    /**
+     * Memeriksa ketersediaan dan jumlah resep tiap area secara paralel (async + awaitAll)
+     * dengan batas konkursi Semaphore(6) agar server tidak overload, lalu disimpan di cache memori.
+     */
+    private fun checkAreaRecipeCounts(areas: List<String>) {
+        if (_areaRecipeCounts.value.isNotEmpty() && _areaRecipeCounts.value.keys.containsAll(areas)) {
+            return // Sudah di-cache, jangan fetch ulang saat navigasi/rotasi
+        }
+        countCheckJob?.cancel()
+        countCheckJob = viewModelScope.launch(Dispatchers.IO) {
+            val semaphore = Semaphore(6)
+            val currentMap = _areaRecipeCounts.value.toMutableMap()
+            coroutineScope {
+                areas.map { area ->
+                    async {
+                        if (currentMap.containsKey(area)) return@async
+                        semaphore.withPermit {
+                            try {
+                                val meals = repository.getMealsByArea(area)
+                                synchronized(currentMap) {
+                                    currentMap[area] = meals.size
+                                }
+                                _areaRecipeCounts.value = currentMap.toMap()
+                            } catch (e: Exception) {
+                                // Abaikan error jaringan sementara
+                            }
+                        }
+                    }
+                }.awaitAll()
+            }
+            _areaRecipeCounts.value = currentMap.toMap()
         }
     }
 
@@ -582,18 +630,21 @@ class MainViewModel(
      */
     fun clearSelectedArea() {
         _selectedArea.value = null
+        _mealsByAreaState.value = UiState.Loading
+        loadedAreaName = null
     }
 
     /**
      * Memuat daftar resep berdasarkan negara terpilih.
      */
     fun loadMealsByArea(area: String, forceRefresh: Boolean = false) {
-        if (!forceRefresh && _selectedArea.value == area && _mealsByAreaState.value is UiState.Success) {
+        if (!forceRefresh && loadedAreaName == area && _mealsByAreaState.value is UiState.Success) {
             // Data negara terpilih sudah ada di memori, tidak perlu fetch ulang saat rotasi layar
             return
         }
+        loadedAreaName = area
+        _mealsByAreaState.value = UiState.Loading
         viewModelScope.launch {
-            _mealsByAreaState.value = UiState.Loading
             try {
                 val meals = repository.getMealsByArea(area)
                 _mealsByAreaState.value = UiState.Success(meals)

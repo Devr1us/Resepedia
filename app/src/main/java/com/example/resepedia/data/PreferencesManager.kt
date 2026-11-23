@@ -2,6 +2,7 @@ package com.example.resepedia.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,12 +10,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 enum class AppThemeMode {
-    SYSTEM,
     LIGHT,
     DARK
 }
 
-class PreferencesManager(context: Context) {
+class PreferencesManager(private val context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("resepedia_prefs", Context.MODE_PRIVATE)
 
@@ -33,18 +33,26 @@ class PreferencesManager(context: Context) {
     private val gson = Gson()
 
     /**
-     * Memuat tema tersimpan. Default: AppThemeMode.SYSTEM
+     * Memuat tema tersimpan (LIGHT atau DARK).
+     * Aman dari migrasi: jika user sebelumnya menyimpan "SYSTEM" atau data tidak dikenal,
+     * otomatis mendeteksi kondisi tema sistem saat itu, lalu menyimpan hasilnya secara permanen.
+     * Default untuk instalasi baru juga mengikuti kondisi sistem saat pertama kali dibuka.
      */
     private fun loadThemeMode(): AppThemeMode {
         val modeStr = prefs.getString(KEY_THEME_MODE, null)
-        if (modeStr != null) {
+        if (modeStr != null && modeStr != "SYSTEM") {
             try {
                 return AppThemeMode.valueOf(modeStr)
             } catch (e: Exception) {
                 // Abaikan bila string tersimpan tidak cocok dengan enum
             }
         }
-        return AppThemeMode.SYSTEM
+
+        // Migrasi dari SYSTEM atau instalasi pertama kali: sesuaikan dengan tema sistem saat ini
+        val isSystemDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        val defaultMode = if (isSystemDark) AppThemeMode.DARK else AppThemeMode.LIGHT
+        prefs.edit().putString(KEY_THEME_MODE, defaultMode.name).apply()
+        return defaultMode
     }
 
     fun setThemeMode(mode: AppThemeMode) {
